@@ -1,0 +1,14 @@
+"use client";
+
+import { useEffect } from "react";
+
+export function SetHtmlLang({ lang }: { lang: string }) {
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    return () => {
+      document.documentElement.lang = "uk";
+    };
+  }, [lang]);
+
+  return null;
+}

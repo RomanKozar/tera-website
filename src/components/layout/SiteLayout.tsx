@@ -1,7 +1,6 @@
 import { getContent } from "@/content";
 import { getFooterNav, getMainNav } from "@/lib/navigation";
-import type { Locale } from "@/lib/site";
-import { SITE } from "@/lib/site";
+import { localePath, SITE, type Locale } from "@/lib/site";
 import { MainNav } from "./MainNav";
 import { SiteFooter } from "./SiteFooter";
 import { TopBar } from "./TopBar";
@@ -23,15 +22,21 @@ export function SiteLayout({
       : `© ${new Date().getFullYear()} ${SITE.name}. All rights reserved.`;
 
   return (
-    <>
-      <TopBar locale={locale} />
-      <MainNav items={mainNav} menuLabel={menuLabel} />
-      <main className="flex-1 bg-white text-foreground">{children}</main>
+    <div className="flex min-h-dvh flex-col bg-white">
+      <div className="sticky top-0 z-50 shadow-sm">
+        <TopBar locale={locale} />
+        <MainNav
+          items={mainNav}
+          menuLabel={menuLabel}
+          homeHref={localePath(locale, "/")}
+        />
+      </div>
+      <main className="relative z-0 flex-1 overflow-x-clip bg-white text-foreground">{children}</main>
       <SiteFooter
         locale={locale}
         footerNav={footerNav}
         copyright={copyright}
       />
-    </>
+    </div>
   );
 }

@@ -2,16 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
 import { DecorativeWaves } from "@/components/home/DecorativeWaves";
-import { HomeMap } from "@/components/home/HomeMap";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import { HomeHeroBanner } from "@/components/home/HomeHeroBanner";
+import { IMAGES } from "@/lib/images";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
-
-const NEWS_THUMBS = [
-  "from-amber-100 to-amber-200",
-  "from-sky-100 to-sky-200",
-  "from-emerald-100 to-emerald-200",
-] as const;
 
 export function HomePage({ locale }: { locale: Locale }) {
   const content = getContent(locale);
@@ -19,92 +13,214 @@ export function HomePage({ locale }: { locale: Locale }) {
   const newsBase = localePath(locale, "/novyny");
 
   const quickLinks = [
-    { href: localePath(locale, "/pro-nas/chleny"), label: nav.aboutMembers },
+    {
+      href: localePath(locale, "/pro-nas/chleny"),
+      label: nav.aboutMembers,
+      description:
+        locale === "uk"
+          ? "Переглянути список громад-учасників"
+          : "View the list of member communities",
+    },
     {
       href: localePath(locale, "/pro-nas/statutni-organy"),
       label: nav.aboutStatutory,
+      description:
+        locale === "uk"
+          ? "Керівництво та структура асоціації"
+          : "Leadership and association structure",
     },
   ];
+  const detailLabel = locale === "uk" ? "Докладніше" : "Details";
+  const leadershipTitle =
+    locale === "uk" ? "КЕРІВНИЦТВО & ЧЛЕНИ" : "LEADERSHIP & MEMBERS";
+  const projectCards = projects.map((project, index) => ({
+    ...project,
+    image: IMAGES.map,
+    description:
+      locale === "uk"
+        ? index === 0
+          ? "Проект екологічний рамки розвитку територіальних громад ініціативи"
+          : "Соціальні ініціативи для підтримки громад Тереблянської долини"
+        : index === 0
+          ? "Environmental framework for community development initiatives"
+          : "Social initiatives supporting Tereblya Valley communities",
+  }));
 
   return (
-    <section className="relative bg-white">
-      <DecorativeWaves />
+    <>
+      <HomeHeroBanner locale={locale} />
 
-      {/* Карта зліва + новини справа */}
-      <article className="relative mx-auto grid max-w-7xl items-start gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-10 lg:py-10">
-        <HomeMap locale={locale} />
+      <section className="relative overflow-x-clip bg-white">
+        <DecorativeWaves />
+        <article className="relative mx-auto max-w-7xl px-4 pb-10 pt-2 sm:px-6 lg:px-8 lg:pb-12 lg:pt-3">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* Новини */}
+            <section className="md:col-span-3">
+              <h2 className="mb-6 inline-block border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
+                {home.newsTitle}
+              </h2>
+              <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                {news.map((item) => (
+                  <li key={item.slug} className="list-none">
+                    <Link
+                      href={`${newsBase}/${item.slug}`}
+                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-tera-border/60 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-tera-gold hover:shadow-md"
+                    >
+                      <span className="relative h-44 w-full overflow-hidden bg-tera-nav-bg sm:h-48">
+                        <Image
+                          src={IMAGES.map}
+                          alt={item.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </span>
+                      <span className="flex flex-1 flex-col p-5">
+                        <time
+                          dateTime={item.date}
+                          className="text-sm font-medium text-foreground/55"
+                        >
+                          {item.date.split("-").reverse().join(".")}
+                        </time>
+                        <span className="mt-4 text-lg font-bold leading-snug text-tera-navy transition-colors group-hover:text-tera-blue">
+                          {item.title}
+                        </span>
+                        <span className="mt-2 text-sm leading-relaxed text-foreground/70">
+                          {item.excerpt}
+                        </span>
+                        <span className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-tera-blue px-4 py-2 text-sm font-bold text-tera-blue transition-colors group-hover:bg-tera-blue group-hover:text-white">
+                          {home.readMore}
+                          <span
+                            aria-hidden="true"
+                            className="transition-transform group-hover:translate-x-1"
+                          >
+                            →
+                          </span>
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-        <section className="min-w-0 lg:border-l lg:border-tera-border lg:pl-8">
-          <SectionHeading>{home.newsTitle}</SectionHeading>
-          <ul className="mt-6 space-y-5">
-            {news.map((item, index) => (
-              <li key={item.slug} className="list-none">
-                <Link
-                  href={`${newsBase}/${item.slug}`}
-                  className="group flex gap-4"
-                >
-                  <span
-                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-sm bg-gradient-to-br ${NEWS_THUMBS[index % NEWS_THUMBS.length]}`}
+            {/* Швидкі посилання */}
+            <section className="rounded-2xl border border-slate-100 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md">
+              <h2 className="max-w-[13rem] text-2xl font-bold uppercase leading-tight tracking-wide text-slate-900">
+                {leadershipTitle}
+              </h2>
+              <ul className="mt-10 space-y-7">
+                {quickLinks.map((link, index) => (
+                  <li key={link.href} className="list-none">
+                    <Link
+                      href={link.href}
+                      className="group flex items-start gap-3 text-slate-900"
+                    >
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-slate-900">
+                        {index === 0 ? (
+                          <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            className="h-5 w-5"
+                          >
+                            <path d="M16 11a3 3 0 1 0-2.83-4" />
+                            <path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            <path d="M2.5 19a5.5 5.5 0 0 1 11 0" />
+                            <path d="M14.5 13.5A5 5 0 0 1 21.5 18" />
+                          </svg>
+                        ) : (
+                          <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            className="h-5 w-5"
+                          >
+                            <path d="M4 10h16" />
+                            <path d="M5 10 12 4l7 6" />
+                            <path d="M6 10v8" />
+                            <path d="M10 10v8" />
+                            <path d="M14 10v8" />
+                            <path d="M18 10v8" />
+                            <path d="M4 18h16" />
+                            <path d="M3 21h18" />
+                          </svg>
+                        )}
+                      </span>
+                      <span>
+                        <span className="block text-lg font-bold transition-colors group-hover:text-tera-blue">
+                          {link.label}
+                        </span>
+                        <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-700">
+                          {detailLabel}
+                          <span
+                            aria-hidden="true"
+                            className="transition-transform group-hover:translate-x-1"
+                          >
+                            →
+                          </span>
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Проекти */}
+            <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md md:col-span-2">
+              <div
+                aria-hidden="true"
+                className="absolute -bottom-16 -right-10 h-56 w-72 rounded-[45%] border border-tera-navy/10 opacity-50"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute -bottom-10 -right-16 h-44 w-64 rounded-[45%] border border-tera-navy/10 opacity-50"
+              />
+              <div className="relative">
+                <h2 className="mb-6 inline-block border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-slate-900">
+                  {home.projectsTitle}
+                </h2>
+              </div>
+              <ul className="relative space-y-5">
+                {projectCards.map((project) => (
+                  <li
+                    key={project.title}
+                    className="list-none rounded-xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-200/70"
                   >
-                    <Image
-                      src="/logo.png"
-                      alt=""
-                      width={48}
-                      height={48}
-                      className="absolute inset-0 m-auto h-8 w-8 object-contain opacity-60"
-                    />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="font-bold text-tera-navy group-hover:text-tera-blue">
-                      {item.title}
+                    <span className="flex items-center gap-4">
+                      <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-tera-nav-bg">
+                        <Image
+                          src={project.image}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="56px"
+                        />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-bold text-slate-900">
+                          {project.title}
+                        </span>
+                        <span className="mt-1 block text-sm leading-snug text-slate-600">
+                          {project.description}
+                        </span>
+                      </span>
+                      <span className="shrink-0 rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-800">
+                        {home.comingSoon}
+                      </span>
                     </span>
-                    <span className="mt-1 block text-sm font-medium text-tera-blue-light group-hover:underline">
-                      {home.readMore}
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href={newsBase}
-            className="mt-6 inline-block text-sm font-semibold text-tera-blue hover:underline"
-          >
-            {locale === "uk" ? "Усі новини" : "All news"} →
-          </Link>
-        </section>
-      </article>
-
-      {/* Швидкі посилання та проекти */}
-      <article className="relative mx-auto grid max-w-7xl gap-10 border-t border-tera-border px-4 py-10 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-12">
-        <section className="flex flex-col justify-center gap-8">
-          {quickLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="quick-link">
-              {link.label}
-            </Link>
-          ))}
-        </section>
-
-        <section>
-          <SectionHeading>{home.projectsTitle}</SectionHeading>
-          <ul className="mt-6 space-y-5">
-            {projects.map((project) => (
-              <li key={project.title} className="list-none">
-                <p className="font-bold text-tera-navy">{project.title}</p>
-                <p className="mt-1 text-sm text-foreground/55">
-                  {home.comingSoon}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href={localePath(locale, "/nashi-proekty")}
-            className="mt-6 inline-block text-sm font-medium text-tera-blue hover:underline"
-          >
-            {nav.projects} →
-          </Link>
-        </section>
-      </article>
-    </section>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </article>
+      </section>
+    </>
   );
 }

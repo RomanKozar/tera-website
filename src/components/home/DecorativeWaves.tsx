@@ -1,25 +1,27 @@
 export function DecorativeWaves() {
   return (
-    <aside
-      className="pointer-events-none absolute -right-4 top-8 hidden h-[420px] w-32 overflow-hidden lg:block xl:w-40"
+    <div
+      className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-7xl -translate-x-1/2 overflow-visible lg:block"
       aria-hidden
     >
-      <svg viewBox="0 0 120 400" className="h-full w-full" fill="none">
-        <path
-          d="M80 0 C40 80 100 160 60 240 S20 360 80 400"
-          stroke="#4aa4de"
-          strokeWidth="28"
-          strokeLinecap="round"
-          opacity="0.35"
-        />
-        <path
-          d="M100 20 C60 100 120 180 80 260 S40 380 100 400"
-          stroke="#f2c94c"
-          strokeWidth="20"
-          strokeLinecap="round"
-          opacity="0.4"
-        />
-      </svg>
-    </aside>
+      <aside className="absolute -right-32 top-0 bottom-0 w-28 overflow-hidden xl:w-36">
+        <svg viewBox="0 0 140 500" className="h-full w-full" fill="none">
+          <path
+            d="M90 0 C50 100 110 200 70 300 S30 420 90 500"
+            stroke="#4aa4de"
+            strokeWidth="32"
+            strokeLinecap="round"
+            opacity="0.28"
+          />
+          <path
+            d="M110 30 C70 130 130 230 90 330 S50 450 110 500"
+            stroke="#fcd116"
+            strokeWidth="22"
+            strokeLinecap="round"
+            opacity="0.35"
+          />
+        </svg>
+      </aside>
+    </div>
   );
 }

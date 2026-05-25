@@ -1,12 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { IMAGES } from "@/lib/images";
 import type { NavItem } from "@/lib/navigation";
+import { SITE } from "@/lib/site";
 
 const linkBase =
-  "flex items-center gap-1 px-3 py-3 text-sm font-semibold text-tera-navy transition-colors hover:text-tera-blue";
+  "flex items-center gap-1 px-2 py-3.5 text-sm font-medium text-tera-navy transition-colors hover:text-tera-blue lg:px-2.5";
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -26,7 +29,7 @@ function NavLink({
     <Link
       href={item.href}
       onClick={onNavigate}
-      className={`${linkBase} ${active ? "border-b-2 border-tera-gold bg-white/30" : ""}`}
+      className={`${linkBase} ${active ? "font-semibold text-tera-blue" : ""}`}
     >
       {item.label}
     </Link>
@@ -48,19 +51,22 @@ function DesktopDropdown({ item }: { item: NavItem }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <Link href={item.href} className={`${linkBase} ${active ? "border-b-2 border-tera-gold bg-white/30" : ""}`}>
+      <Link
+        href={item.href}
+        className={`${linkBase} ${active ? "font-semibold text-tera-blue" : ""}`}
+      >
         {item.label}
         <span className="text-[10px] opacity-70" aria-hidden>
           ▾
         </span>
       </Link>
       {open && (
-        <ul className="absolute left-0 top-full z-30 min-w-[280px] border border-tera-border bg-white py-1 shadow-xl">
+        <ul className="absolute left-0 top-full z-30 min-w-[280px] border border-tera-border bg-white py-1 shadow-lg">
           {item.children.map((child) => (
             <li key={child.href} className="list-none">
               <Link
                 href={child.href}
-                className="block px-4 py-3 text-sm font-medium text-tera-navy hover:bg-tera-nav-bg hover:text-tera-blue"
+                className="block px-4 py-3 text-sm text-tera-navy hover:bg-tera-nav-bg hover:text-tera-blue"
               >
                 {child.label}
               </Link>
@@ -72,8 +78,18 @@ function DesktopDropdown({ item }: { item: NavItem }) {
   );
 }
 
-export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: string }) {
+export function MainNav({
+  items,
+  menuLabel,
+  homeHref,
+}: {
+  items: NavItem[];
+  menuLabel: string;
+  homeHref: string;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
+  const pathname = usePathname();
 
   return (
     <>
@@ -81,7 +97,7 @@ export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: str
         className="hidden bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end lg:block"
         aria-label={menuLabel}
       >
-        <ul className="mx-auto flex max-w-7xl flex-wrap px-2">
+        <ul className="mx-auto flex max-w-7xl flex-wrap items-center justify-start gap-0 px-4 sm:gap-1">
           {items.map((item) =>
             item.children?.length ? (
               <DesktopDropdown key={item.href} item={item} />
@@ -95,38 +111,140 @@ export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: str
       </nav>
 
       <section
-        className="bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end lg:hidden"
+        className="lg:hidden"
         aria-label={menuLabel}
       >
+        <div className="h-1.5 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end" />
         <button
           type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-tera-navy"
+          className="absolute right-4 top-6 z-20 flex h-10 w-10 items-center justify-center text-white transition-colors hover:text-tera-gold"
           onClick={() => setMobileOpen((v) => !v)}
           aria-expanded={mobileOpen}
+          aria-label={menuLabel}
         >
-          {menuLabel}
-          <span aria-hidden>{mobileOpen ? "✕" : "☰"}</span>
+          <span className="text-3xl leading-none" aria-hidden>
+            ☰
+          </span>
         </button>
         {mobileOpen && (
-          <nav className="border-t border-tera-blue/15 bg-white/40 pb-2">
-            {items.map((item) => (
-              <section key={item.href}>
-                <NavLink item={item} onNavigate={() => setMobileOpen(false)} />
-                {item.children?.map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block border-t border-tera-border/50 py-2.5 pl-8 pr-4 text-sm font-medium text-tera-navy hover:bg-white/60"
-                  >
-                    {child.label}
-                  </Link>
-                ))}
-              </section>
-            ))}
-          </nav>
+          <div className="fixed inset-0 z-50 bg-black/45" role="dialog" aria-modal="true">
+            <button
+              type="button"
+              className="absolute inset-0 cursor-default"
+              aria-label={localeCloseLabel(menuLabel)}
+              onClick={() => setMobileOpen(false)}
+            />
+            <aside className="relative mr-auto flex h-dvh w-[min(86vw,360px)] flex-col bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end text-tera-navy shadow-2xl">
+              <div className="flex h-24 items-center justify-between gap-4 bg-tera-navy px-7">
+                <Link
+                  href={homeHref}
+                  className="flex h-16 shrink-0 items-center"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label={SITE.name}
+                >
+                  <Image
+                    src={IMAGES.logo}
+                    alt={SITE.name}
+                    width={180}
+                    height={100}
+                    className="h-full w-auto"
+                    unoptimized
+                  />
+                </Link>
+                <p className="min-w-0 flex-1 truncate text-sm font-bold uppercase tracking-wide text-white">
+                  {SITE.shortName}
+                </p>
+                <button
+                  type="button"
+                  className="text-4xl leading-none text-white transition-colors hover:text-tera-gold"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label={localeCloseLabel(menuLabel)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto px-9 py-8" aria-label={menuLabel}>
+                <ul>
+                  {items.map((item) => {
+                    const active = isActive(pathname, item.href);
+                    const expanded = expandedMobile === item.href;
+                    const hasChildren = Boolean(item.children?.length);
+                    const toggleExpanded = () =>
+                      setExpandedMobile((current) =>
+                        current === item.href ? null : item.href,
+                      );
+
+                    return (
+                      <li key={item.href} className="list-none border-b border-tera-blue/15">
+                        <div className="flex items-center justify-between gap-3">
+                          {hasChildren ? (
+                            <button
+                              type="button"
+                              className={`block flex-1 py-5 text-left text-base transition-colors hover:text-tera-blue ${
+                                active ? "font-bold text-tera-blue" : "text-tera-navy"
+                              }`}
+                              onClick={toggleExpanded}
+                              aria-expanded={expanded}
+                            >
+                              {item.label}
+                            </button>
+                          ) : (
+                            <Link
+                              href={item.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`block flex-1 py-5 text-base transition-colors hover:text-tera-blue ${
+                                active ? "font-bold text-tera-blue" : "text-tera-navy"
+                              }`}
+                            >
+                              {item.label}
+                            </Link>
+                          )}
+                          {hasChildren ? (
+                            <button
+                              type="button"
+                              className="flex h-11 w-8 shrink-0 items-center justify-center text-tera-navy transition-colors hover:text-tera-blue"
+                              onClick={toggleExpanded}
+                              aria-expanded={expanded}
+                              aria-label={item.label}
+                            >
+                              <span
+                                aria-hidden
+                                className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+                              >
+                                ▾
+                              </span>
+                            </button>
+                          ) : null}
+                        </div>
+                        {expanded && item.children?.length ? (
+                          <ul className="pb-4">
+                            {item.children.map((child) => (
+                              <li key={child.href} className="list-none">
+                                <Link
+                                  href={child.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className="block py-2 pl-4 text-sm text-tera-navy/70 transition-colors hover:text-tera-blue"
+                                >
+                                  {child.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </aside>
+          </div>
         )}
       </section>
     </>
   );
+}
+
+function localeCloseLabel(menuLabel: string) {
+  return menuLabel === "Меню" ? "Закрити меню" : "Close menu";
 }

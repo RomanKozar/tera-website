@@ -2,8 +2,15 @@ export type ContentStatus = "ready" | "draft" | "empty" | "planned";
 
 export type PageContent = {
   title: string;
+  subtitle?: string;
+  lead?: string;
+  highlights?: {
+    label: string;
+    value: string;
+  }[];
   status: ContentStatus;
   body: string[];
+  goals?: string[];
 };
 
 export type NewsItem = {
@@ -11,6 +18,7 @@ export type NewsItem = {
   date: string;
   title: string;
   excerpt: string;
+  image: string;
   status: ContentStatus;
 };
 

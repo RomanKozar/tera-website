@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { geometria } from "@/lib/fonts";
 import { SITE } from "@/lib/site";
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -23,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uk" className={`${montserrat.variable} h-full`}>
-      <body className="flex min-h-full flex-col bg-white antialiased">
+    <html lang="uk" className={`${geometria.variable} h-full font-sans`}>
+      <body className="min-h-dvh bg-white antialiased">
         {children}
       </body>
     </html>

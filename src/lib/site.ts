@@ -8,9 +8,9 @@ export const SITE = {
   facebookUrl:
     "https://www.facebook.com/profile.php?id=61584037588588",
   contacts: {
-    address: "(placeholder_address)",
-    phone: "(placeholder_phone)",
-    email: "(placeholder_email)",
+    address: "с. Теребля, вул. Центральна, 1, Закарпатська область",
+    phone: "+38 (067) 123-45-67",
+    email: "info@tera.org.ua",
   },
 } as const;
 

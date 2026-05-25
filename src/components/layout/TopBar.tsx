@@ -1,10 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE, type Locale } from "@/lib/site";
-import { localePath } from "@/lib/site";
+import { localePath, switchLocalePath } from "@/lib/site";
+import { IMAGES } from "@/lib/images";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
+import { FooterLocale } from "./FooterLocale";
 
 export function TopBar({ locale }: { locale: Locale }) {
+  const pathname = usePathname();
+  const otherHref = switchLocalePath(locale, pathname);
   const title =
     locale === "uk"
       ? SITE.headerTitle
@@ -12,34 +19,65 @@ export function TopBar({ locale }: { locale: Locale }) {
 
   return (
     <header className="bg-tera-navy text-white">
-      <article className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <article className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:py-2.5">
         <Link
           href={localePath(locale, "/")}
-          className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
+          className="flex h-16 w-20 shrink-0 items-center overflow-visible lg:h-[52px] lg:w-28"
+          aria-label={locale === "uk" ? "На головну сторінку" : "Go to homepage"}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
           <Image
-            src="/logo.png"
+            src={IMAGES.logo}
             alt={SITE.name}
-            width={64}
-            height={64}
-            className="h-12 w-12 shrink-0 rounded-full bg-white p-0.5 sm:h-14 sm:w-14"
+            width={180}
+            height={100}
+            className="h-full w-auto origin-left scale-110 lg:scale-[1.45]"
             priority
+            unoptimized
           />
-          <span className="hidden text-[10px] font-semibold uppercase leading-snug tracking-wide text-white/95 sm:block sm:text-xs lg:text-sm">
-            {title}
-          </span>
-          <span className="text-sm font-bold sm:hidden">{SITE.name}</span>
         </Link>
 
-        <a
-          href={SITE.facebookUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-tera-blue transition-opacity hover:opacity-90"
-          aria-label="Facebook"
-        >
-          <FacebookIcon className="h-5 w-5" />
-        </a>
+        <p className="min-w-0 -ml-4 truncate text-left text-sm font-bold uppercase tracking-wide text-white lg:hidden">
+          {SITE.shortName}
+        </p>
+
+        <p className="hidden text-left text-[9px] font-semibold uppercase leading-snug tracking-wide text-white/95 lg:block lg:text-xs">
+          {title}
+        </p>
+
+        <div className="flex items-center justify-end gap-2 justify-self-end pr-12 lg:gap-3 lg:pr-0">
+          <p className="flex items-center gap-1 text-xs font-semibold tracking-wide text-white/90 lg:hidden">
+            {locale === "uk" ? (
+              <>
+                <span className="text-white">UA</span>
+                <span className="text-white/45">|</span>
+                <Link href={otherHref} hrefLang="en" className="hover:text-tera-gold">
+                  EN
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href={otherHref} hrefLang="uk" className="hover:text-tera-gold">
+                  UA
+                </Link>
+                <span className="text-white/45">|</span>
+                <span className="text-white">EN</span>
+              </>
+            )}
+          </p>
+          <div className="hidden lg:block">
+            <FooterLocale locale={locale} />
+          </div>
+          <a
+            href={SITE.facebookUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-tera-blue transition-opacity hover:opacity-90 lg:h-10 lg:w-10"
+            aria-label="Facebook"
+          >
+            <FacebookIcon className="h-5 w-5" />
+          </a>
+        </div>
       </article>
     </header>
   );

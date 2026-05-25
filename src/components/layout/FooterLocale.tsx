@@ -13,9 +13,6 @@ export function FooterLocale({ locale }: { locale: Locale }) {
 
   return (
     <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/90 sm:justify-end">
-      <span aria-hidden className="text-base">
-        🇺🇦
-      </span>
       {locale === "uk" ? (
         <>
           <span className="font-medium text-white">{footer.langUk}</span>

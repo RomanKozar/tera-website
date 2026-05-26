@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   title: getContent("uk").nav.news,
 };
 
-export default function NovynyPage() {
+export const revalidate = 60;
+
+export default async function NovynyPage() {
   return <NewsList locale="uk" />;
 }

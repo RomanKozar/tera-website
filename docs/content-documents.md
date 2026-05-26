@@ -12,4 +12,4 @@
 | Файл 8 | `pages["richka-tereblya"]` |
 | Файл 9 | `pages["krashi-praktyky"]` |
 
-Логотип: `public/logo.webp`
+Логотип: `public/images/logo/Tera_logo-v2.webp`

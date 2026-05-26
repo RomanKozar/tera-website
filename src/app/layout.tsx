@@ -9,6 +9,16 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.shortName}`,
   },
   description: SITE.fullName,
+  icons: {
+    icon: [
+      {
+        url: "/favicon.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

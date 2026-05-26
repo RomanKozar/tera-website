@@ -57,7 +57,7 @@ export function HomeHeroBanner({ locale }: { locale: Locale }) {
               unoptimized
               className="h-auto w-full max-w-[92px] sm:max-w-[170px]"
             />
-            <h1 className="text-base font-bold uppercase leading-tight tracking-wide text-tera-navy sm:text-2xl lg:text-3xl">
+            <h1 className="mt-6 text-base font-bold uppercase leading-tight tracking-wide text-tera-navy sm:mt-0 sm:text-2xl lg:text-3xl">
               {home.heroSlogan}
             </h1>
           </div>

@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   title: getContent("en").nav.news,
 };
 
-export default function NewsPage() {
+export const revalidate = 60;
+
+export default async function NewsPage() {
   return <NewsList locale="en" />;
 }

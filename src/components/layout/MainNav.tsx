@@ -9,7 +9,7 @@ import type { NavItem } from "@/lib/navigation";
 import { SITE } from "@/lib/site";
 
 const linkBase =
-  "flex items-center gap-1 px-2 py-3.5 text-sm font-medium text-tera-navy transition-colors hover:text-tera-blue lg:px-2.5";
+  "flex cursor-pointer items-center gap-1 px-2 py-3.5 text-sm font-medium text-tera-navy transition-colors hover:text-tera-blue lg:px-2.5";
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -39,7 +39,9 @@ function NavLink({
 function DesktopDropdown({ item }: { item: NavItem }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const active = isActive(pathname, item.href);
+  const active =
+    isActive(pathname, item.href) ||
+    Boolean(item.children?.some((child) => isActive(pathname, child.href)));
 
   if (!item.children?.length) {
     return <NavLink item={item} />;
@@ -51,15 +53,15 @@ function DesktopDropdown({ item }: { item: NavItem }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <Link
-        href={item.href}
+      <button
+        type="button"
         className={`${linkBase} ${active ? "font-semibold text-tera-blue" : ""}`}
       >
         {item.label}
         <span className="text-[10px] opacity-70" aria-hidden>
           ▾
         </span>
-      </Link>
+      </button>
       {open && (
         <ul className="absolute left-0 top-full z-30 min-w-[280px] border border-tera-border bg-white py-1 shadow-lg">
           {item.children.map((child) => (

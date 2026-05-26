@@ -5,6 +5,7 @@ import { AccentWave } from "@/components/ui/AccentWave";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
+import { getNewsItemsWithFallback } from "@/sanity/lib/news";
 
 function formatDate(date: string, locale: Locale) {
   return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -14,8 +15,9 @@ function formatDate(date: string, locale: Locale) {
   });
 }
 
-export function NewsList({ locale }: { locale: Locale }) {
+export async function NewsList({ locale }: { locale: Locale }) {
   const { news, nav, home } = getContent(locale);
+  const newsItems = await getNewsItemsWithFallback(news);
   const base = localePath(locale, "/novyny");
 
   return (
@@ -27,14 +29,14 @@ export function NewsList({ locale }: { locale: Locale }) {
           <AccentWave className="-right-40 top-56" />
 
           <ul className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.map((item) => (
+            {newsItems.map((item) => (
               <li key={item.slug} className="list-none">
                 <article className="overflow-hidden rounded-xl border border-tera-border bg-white shadow-sm hover:shadow-md">
                   <Link href={`${base}/${item.slug}`}>
                     <div className="relative aspect-[16/10] bg-tera-nav-bg">
                       <Image
                         src={item.image}
-                        alt=""
+                        alt={item.imageAlt || ""}
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 33vw"

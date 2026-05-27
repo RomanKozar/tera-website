@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { IMAGES } from "@/lib/images";
 import type { NavItem } from "@/lib/navigation";
-import { SITE } from "@/lib/site";
+import { getSiteMeta, type Locale } from "@/lib/site";
 
 const linkBase =
   "flex cursor-pointer items-center gap-1 px-2 py-3.5 text-sm font-medium text-tera-navy transition-colors hover:text-tera-blue lg:px-2.5";
@@ -83,12 +83,17 @@ function DesktopDropdown({ item }: { item: NavItem }) {
 export function MainNav({
   items,
   menuLabel,
+  menuCloseLabel,
   homeHref,
+  locale,
 }: {
   items: NavItem[];
   menuLabel: string;
+  menuCloseLabel: string;
   homeHref: string;
+  locale: Locale;
 }) {
+  const site = getSiteMeta(locale);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
   const pathname = usePathname();
@@ -133,7 +138,7 @@ export function MainNav({
             <button
               type="button"
               className="absolute inset-0 cursor-default"
-              aria-label={localeCloseLabel(menuLabel)}
+              aria-label={menuCloseLabel}
               onClick={() => setMobileOpen(false)}
             />
             <aside className="relative mr-auto flex h-dvh w-[min(86vw,360px)] flex-col bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end text-tera-navy shadow-2xl">
@@ -142,11 +147,11 @@ export function MainNav({
                   href={homeHref}
                   className="flex h-16 shrink-0 items-center"
                   onClick={() => setMobileOpen(false)}
-                  aria-label={SITE.name}
+                  aria-label={site.name}
                 >
                   <Image
                     src={IMAGES.logo}
-                    alt={SITE.name}
+                    alt={site.name}
                     width={180}
                     height={100}
                     className="h-full w-auto"
@@ -154,13 +159,13 @@ export function MainNav({
                   />
                 </Link>
                 <p className="min-w-0 flex-1 truncate text-sm font-bold uppercase tracking-wide text-white">
-                  {SITE.shortName}
+                  {site.shortName}
                 </p>
                 <button
                   type="button"
                   className="text-4xl leading-none text-white transition-colors hover:text-tera-gold"
                   onClick={() => setMobileOpen(false)}
-                  aria-label={localeCloseLabel(menuLabel)}
+                  aria-label={menuCloseLabel}
                 >
                   ×
                 </button>
@@ -247,6 +252,3 @@ export function MainNav({
   );
 }
 
-function localeCloseLabel(menuLabel: string) {
-  return menuLabel === "Меню" ? "Закрити меню" : "Close menu";
-}

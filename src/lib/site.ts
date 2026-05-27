@@ -1,18 +1,38 @@
+import { getContent } from "@/content";
+import { content as ukContent } from "@/content/uk";
+
 export const SITE = {
-  name: "ТеРА",
-  fullName:
-    "Місцева Асоціація органів місцевого самоврядування Тереблянської долини «ТеРА»",
-  headerTitle:
-    "МІСЦЕВА АСОЦІАЦІЯ ОРГАНІВ МІСЦЕВОГО САМОВРЯДУВАННЯ ТЕРЕБЛЯНСЬКОЇ ДОЛИНИ «ТеРА»",
-  shortName: "МАОМС «ТеРА»",
+  name: ukContent.site.name,
+  fullName: ukContent.site.fullName,
+  headerTitle: ukContent.site.headerTitle,
+  shortName: ukContent.site.shortName,
   facebookUrl:
     "https://www.facebook.com/profile.php?id=61584037588588",
   contacts: {
-    address: "с. Теребля, вул. Центральна, 1, Закарпатська область",
-    phone: "+38 (067) 123-45-67",
-    email: "info@tera.org.ua",
+    website: "http://www.aoms-tera.org",
+    websiteLabel: "www.aoms-tera.org",
+    phone: "+38 096 838 5300",
+    phoneHref: "tel:+380968385300",
+    email: "aomstera@gmail.com",
+    address: ukContent.site.address,
   },
 } as const;
+
+/** Locale-aware organisation names and mailing address. */
+export function getSiteMeta(locale: Locale) {
+  const { site } = getContent(locale);
+  return {
+    ...SITE,
+    name: site.name,
+    fullName: site.fullName,
+    headerTitle: site.headerTitle,
+    shortName: site.shortName,
+    contacts: {
+      ...SITE.contacts,
+      address: site.address,
+    },
+  };
+}
 
 export type Locale = "uk" | "en";
 

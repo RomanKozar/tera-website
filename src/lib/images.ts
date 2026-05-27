@@ -11,4 +11,10 @@ export const IMAGES = {
     "/images/news/news-2.webp",
     "/images/news/news-3.webp",
   ],
+  members: {
+    bushtyn: "/images/tera-members/bushyn-community.webp",
+    kolochava: "/images/tera-members/kolochavska-community.webp",
+    dragiv: "/images/tera-members/dragivska-community.webp",
+    synevyr: "/images/tera-members/synevyr-community.webp",
+  },
 } as const;

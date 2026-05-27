@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { IMAGES } from "@/lib/images";
 import { getContent } from "@/content";
-import { SITE, type Locale } from "@/lib/site";
+import { getSiteMeta, type Locale } from "@/lib/site";
 
 export function HomeHeroBanner({ locale }: { locale: Locale }) {
-  const { home } = getContent(locale);
+  const { home, ui } = getContent(locale);
+  const site = getSiteMeta(locale);
 
   return (
     <section className="relative overflow-x-clip bg-white px-4 pb-3 pt-8 sm:px-6 sm:pb-4 sm:pt-10">
@@ -33,11 +34,7 @@ export function HomeHeroBanner({ locale }: { locale: Locale }) {
         <div className="relative z-10 overflow-hidden rounded-2xl shadow-md">
           <Image
             src={IMAGES.hero}
-            alt={
-              locale === "uk"
-                ? "Карта громад ТеРА — співпраця для розвитку громад"
-                : "TeRA communities map"
-            }
+            alt={ui.heroMapAlt}
             width={1280}
             height={520}
             priority
@@ -51,7 +48,7 @@ export function HomeHeroBanner({ locale }: { locale: Locale }) {
           <div className="absolute left-4 top-3 z-10 flex max-w-[180px] flex-col gap-2 sm:left-8 sm:top-4 sm:max-w-xs sm:gap-4 lg:top-5">
             <Image
               src={IMAGES.logoMain}
-              alt={SITE.name}
+              alt={site.name}
               width={180}
               height={180}
               unoptimized

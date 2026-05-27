@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
-import { AccentWave } from "@/components/ui/AccentWave";
+import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { PageContent } from "@/content/types";
+import { MembersPage } from "@/components/pages/MembersPage";
+import { ContactsPage } from "@/components/pages/ContactsPage";
+import { StatutoryBodiesPage } from "@/components/pages/StatutoryBodiesPage";
 import { IMAGES } from "@/lib/images";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
@@ -18,14 +21,15 @@ function MaomsTeraPage({
   page: PageContent;
   statusLabel: string;
 }) {
+  const { nav, ui } = getContent(locale);
   const aboutLinks = [
     {
       href: localePath(locale, "/pro-nas/chleny"),
-      label: locale === "uk" ? "Члени асоціації" : "Association members",
+      label: nav.aboutMembers,
     },
     {
       href: localePath(locale, "/pro-nas/statutni-organy"),
-      label: locale === "uk" ? "Статутні органи" : "Statutory bodies",
+      label: nav.aboutStatutory,
     },
   ];
 
@@ -34,9 +38,7 @@ function MaomsTeraPage({
       <PageHeader title={page.title} subtitle={page.subtitle} />
       <section className="relative overflow-hidden">
         <article className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-12">
-          <AccentWave className="-left-32 top-0 -scale-x-100" />
-          <AccentWave className="-right-40 top-[520px]" />
-          <AccentWave className="-left-36 top-[1180px] -scale-x-100" />
+          <AccentWaveStack tops={[0, 520, 1180, 1880]} start="left" />
 
         <section className="relative z-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rounded-2xl border border-tera-border/70 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md sm:p-8">
@@ -68,7 +70,7 @@ function MaomsTeraPage({
           <div className="relative min-h-[300px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md">
             <Image
               src={IMAGES.heroV3}
-              alt={locale === "uk" ? "Карта громад ТеРА" : "TeRA communities map"}
+              alt={ui.communitiesMapAlt}
               fill
               className="object-cover object-[center_10%]"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -77,12 +79,10 @@ function MaomsTeraPage({
             <div className="absolute inset-0 bg-gradient-to-t from-tera-navy/50 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/90 p-4 shadow-sm backdrop-blur">
               <p className="text-sm font-semibold uppercase tracking-wide text-tera-blue">
-                {locale === "uk" ? "Тереблянська долина" : "Tereblya Valley"}
+                {ui.tereblyaValley}
               </p>
               <p className="mt-1 text-lg font-bold text-tera-navy">
-                {locale === "uk"
-                  ? "Співпраця громад для сталого розвитку"
-                  : "Community cooperation for sustainable development"}
+                {ui.cooperationTagline}
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ function MaomsTeraPage({
             <div className="relative min-h-[260px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md">
               <Image
                 src={IMAGES.river}
-                alt={locale === "uk" ? "Річка Теребля" : "Tereblya River"}
+                alt={ui.riverAlt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 35vw"
@@ -101,16 +101,10 @@ function MaomsTeraPage({
             </div>
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md">
               <h2 className="border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
-                {locale === "uk" ? "Принципи діяльності" : "Operating principles"}
+                {ui.operatingPrinciples}
               </h2>
               <ul className="mt-5 space-y-3 text-sm font-medium text-slate-700">
-                {[
-                  locale === "uk" ? "законність" : "legality",
-                  locale === "uk" ? "добровільність" : "voluntary participation",
-                  locale === "uk" ? "рівноправність членів" : "equality of members",
-                  locale === "uk" ? "відкритість і публічність" : "openness and transparency",
-                  locale === "uk" ? "демократичність" : "democratic governance",
-                ].map((item) => (
+                {ui.principles.map((item) => (
                   <li key={item} className="flex gap-3">
                     <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-tera-gold" />
                     <span>{item}</span>
@@ -122,7 +116,7 @@ function MaomsTeraPage({
 
           <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md sm:p-8">
             <h2 className="border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
-              {locale === "uk" ? "Про асоціацію" : "About the association"}
+              {ui.aboutAssociation}
             </h2>
             <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
               {page.body.map((paragraph) => (
@@ -135,7 +129,7 @@ function MaomsTeraPage({
         {page.goals?.length ? (
           <section className="relative z-10 mt-10 rounded-2xl border border-tera-border/70 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md sm:p-8">
             <h2 className="border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
-              {locale === "uk" ? "Основна мета Асоціації" : "Main goals"}
+              {ui.mainGoals}
             </h2>
             <ul className="mt-6 grid gap-4 md:grid-cols-2">
               {page.goals.map((goal, index) => (
@@ -168,7 +162,7 @@ function MaomsTeraPage({
                 {link.label}
               </span>
               <span className="mt-2 block text-sm font-medium text-tera-blue">
-                {locale === "uk" ? "Перейти до розділу" : "Open section"} →
+                {ui.goToSection} →
               </span>
             </Link>
           ))}
@@ -203,13 +197,24 @@ export function ContentPage({
     );
   }
 
+  if (pageKey === "chleny") {
+    return <MembersPage locale={locale} page={page} />;
+  }
+
+  if (pageKey === "statutni-organy") {
+    return <StatutoryBodiesPage locale={locale} page={page} />;
+  }
+
+  if (pageKey === "kontakty") {
+    return <ContactsPage locale={locale} page={page} />;
+  }
+
   return (
     <>
       <PageHeader title={page.title} />
       <section className="relative overflow-hidden">
         <article className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <AccentWave className="-left-32 top-0 -scale-x-100" />
-          <AccentWave className="-right-40 top-28" />
+          <AccentWaveStack tops={[0, 112, 720]} start="left" />
 
           <div className="relative z-10">
             <ContentStatusBadge

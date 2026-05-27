@@ -37,5 +37,6 @@ export function getFooterNav(locale: Locale, content: SiteContent): NavItem[] {
     { label: content.footer.news, href: p("/novyny") },
     { label: content.footer.about, href: p("/pro-nas/maoms-tera") },
     { label: content.footer.river, href: p("/richka-tereblya") },
+    { label: content.nav.contacts, href: p("/kontakty") },
   ];
 }

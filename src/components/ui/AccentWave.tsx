@@ -1,9 +1,18 @@
-export function AccentWave({ className = "" }: { className?: string }) {
+import type { CSSProperties } from "react";
+
+export function AccentWave({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 120 420"
       className={`pointer-events-none absolute hidden h-[520px] w-36 opacity-80 lg:block ${className}`}
+      style={style}
     >
       <path
         d="M72 18C42 92 81 153 57 230C38 290 16 332 73 402"

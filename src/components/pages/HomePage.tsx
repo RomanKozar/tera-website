@@ -9,41 +9,25 @@ import { localePath } from "@/lib/site";
 
 export function HomePage({ locale }: { locale: Locale }) {
   const content = getContent(locale);
-  const { home, news, nav, projects } = content;
+  const { home, news, nav, projects, ui } = content;
   const newsBase = localePath(locale, "/novyny");
 
   const quickLinks = [
     {
       href: localePath(locale, "/pro-nas/chleny"),
       label: nav.aboutMembers,
-      description:
-        locale === "uk"
-          ? "Переглянути список громад-учасників"
-          : "View the list of member communities",
+      description: ui.viewMemberCommunities,
     },
     {
       href: localePath(locale, "/pro-nas/statutni-organy"),
       label: nav.aboutStatutory,
-      description:
-        locale === "uk"
-          ? "Керівництво та структура асоціації"
-          : "Leadership and association structure",
+      description: ui.viewLeadershipStructure,
     },
   ];
-  const detailLabel = locale === "uk" ? "Докладніше" : "Details";
-  const leadershipTitle =
-    locale === "uk" ? "КЕРІВНИЦТВО & ЧЛЕНИ" : "LEADERSHIP & MEMBERS";
   const projectCards = projects.map((project, index) => ({
     ...project,
     image: IMAGES.map,
-    description:
-      locale === "uk"
-        ? index === 0
-          ? "Проект екологічний рамки розвитку територіальних громад ініціативи"
-          : "Соціальні ініціативи для підтримки громад Тереблянської долини"
-        : index === 0
-          ? "Environmental framework for community development initiatives"
-          : "Social initiatives supporting Tereblya Valley communities",
+    description: index === 0 ? ui.projectEnvDesc : ui.projectSocialDesc,
   }));
 
   return (
@@ -107,7 +91,7 @@ export function HomePage({ locale }: { locale: Locale }) {
             {/* Швидкі посилання */}
             <section className="rounded-2xl border border-slate-100 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md">
               <h2 className="max-w-[13rem] text-2xl font-bold uppercase leading-tight tracking-wide text-slate-900">
-                {leadershipTitle}
+                {ui.leadershipMembers}
               </h2>
               <ul className="mt-10 space-y-7">
                 {quickLinks.map((link, index) => (
@@ -156,7 +140,7 @@ export function HomePage({ locale }: { locale: Locale }) {
                           {link.label}
                         </span>
                         <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-700">
-                          {detailLabel}
+                          {ui.details}
                           <span
                             aria-hidden="true"
                             className="transition-transform group-hover:translate-x-1"

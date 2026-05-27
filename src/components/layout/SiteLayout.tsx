@@ -1,6 +1,6 @@
 import { getContent } from "@/content";
 import { getFooterNav, getMainNav } from "@/lib/navigation";
-import { localePath, SITE, type Locale } from "@/lib/site";
+import { getSiteMeta, localePath, type Locale } from "@/lib/site";
 import { MainNav } from "./MainNav";
 import { SiteFooter } from "./SiteFooter";
 import { TopBar } from "./TopBar";
@@ -13,13 +13,10 @@ export function SiteLayout({
   children: React.ReactNode;
 }) {
   const content = getContent(locale);
+  const site = getSiteMeta(locale);
   const mainNav = getMainNav(locale, content);
   const footerNav = getFooterNav(locale, content);
-  const menuLabel = locale === "uk" ? "Меню" : "Menu";
-  const copyright =
-    locale === "uk"
-      ? `© ${new Date().getFullYear()} ${SITE.shortName}. Усі права захищені.`
-      : `© ${new Date().getFullYear()} ${SITE.name}. All rights reserved.`;
+  const copyright = `© ${new Date().getFullYear()} ${site.shortName}. ${content.ui.copyrightSuffix}`;
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
@@ -27,8 +24,10 @@ export function SiteLayout({
         <TopBar locale={locale} />
         <MainNav
           items={mainNav}
-          menuLabel={menuLabel}
+          menuLabel={content.ui.menu}
+          menuCloseLabel={content.ui.menuClose}
           homeHref={localePath(locale, "/")}
+          locale={locale}
         />
       </div>
       <main className="relative z-0 flex-1 overflow-x-clip bg-white text-foreground">{children}</main>

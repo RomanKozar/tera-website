@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
-import { AccentWave } from "@/components/ui/AccentWave";
+import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
@@ -25,8 +25,7 @@ export async function NewsList({ locale }: { locale: Locale }) {
       <PageHeader title={nav.news} />
       <section className="relative overflow-hidden">
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <AccentWave className="-left-32 top-0 -scale-x-100" />
-          <AccentWave className="-right-40 top-56" />
+          <AccentWaveStack tops={[0, 224, 720]} start="left" />
 
           <ul className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {newsItems.map((item) => (

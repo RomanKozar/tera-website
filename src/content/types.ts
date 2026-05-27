@@ -26,7 +26,64 @@ export type HomeProject = {
   title: string;
 };
 
+export type SiteMeta = {
+  name: string;
+  fullName: string;
+  headerTitle: string;
+  shortName: string;
+  address: string;
+};
+
+export type SiteUi = {
+  menu: string;
+  menuClose: string;
+  goToHome: string;
+  footerMenu: string;
+  copyrightSuffix: string;
+  goToSection: string;
+  otherAboutSections: string;
+  tereblyaValley: string;
+  cooperationTagline: string;
+  communitiesMapAlt: string;
+  riverAlt: string;
+  heroMapAlt: string;
+  operatingPrinciples: string;
+  principles: string[];
+  aboutAssociation: string;
+  mainGoals: string;
+  details: string;
+  leadershipMembers: string;
+  viewMemberCommunities: string;
+  viewLeadershipStructure: string;
+  projectEnvDesc: string;
+  projectSocialDesc: string;
+  backToNews: string;
+  newsDraftNotice: string;
+  newsFallbackTitle: string;
+  facebookPageAria: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  facebookAria: string;
+  area: string;
+  population: string;
+  head: string;
+  communityWebsite: string;
+  mapSource: string;
+  established: string;
+  orgContactsTitle: string;
+  websiteLabel: string;
+  phoneLabel: string;
+  facebookLabel: string;
+  facebookOpen: string;
+  emailLabel: string;
+  addressLabel: string;
+};
+
 export type SiteContent = {
+  site: SiteMeta;
+  ui: SiteUi;
   nav: {
     about: string;
     aboutMaoms: string;

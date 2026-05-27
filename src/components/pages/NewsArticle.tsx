@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortableText } from "@portabletext/react";
 import { getContent } from "@/content";
-import { AccentWave } from "@/components/ui/AccentWave";
+import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
@@ -18,7 +18,7 @@ export async function NewsArticle({
   locale: Locale;
   slug: string;
 }) {
-  const { news, statusLabels, nav } = getContent(locale);
+  const { news, statusLabels, nav, ui } = getContent(locale);
   const item = await getNewsItemWithFallback(slug, news);
 
   if (!item) {
@@ -35,8 +35,7 @@ export async function NewsArticle({
       <PageHeader title={item.title} subtitle={date} />
       <section className="relative overflow-hidden">
         <article className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <AccentWave className="-left-32 top-0 -scale-x-100" />
-          <AccentWave className="-right-40 top-28" />
+          <AccentWaveStack tops={[0, 112, 760]} start="left" />
 
           <section className="relative z-10 max-w-3xl rounded-2xl border border-slate-100 bg-white p-6 shadow-md sm:p-8">
             <ContentStatusBadge
@@ -87,9 +86,7 @@ export async function NewsArticle({
                   {item.excerpt}
                 </p>
                 <p className="mt-6 text-sm text-foreground/60">
-                  {locale === "uk"
-                    ? "Повний текст новини буде опубліковано після завершення підготовки матеріалу."
-                    : "The full article will be published once the material is ready."}
+                  {ui.newsDraftNotice}
                 </p>
               </>
             )}

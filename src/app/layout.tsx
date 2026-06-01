@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { geometria } from "@/lib/fonts";
 import { SITE } from "@/lib/site";
@@ -10,14 +11,9 @@ export const metadata: Metadata = {
   },
   description: SITE.fullName,
   icons: {
-    icon: [
-      {
-        url: "/favicon.png",
-        type: "image/png",
-      },
-    ],
+    icon: "/favicon.png",
     shortcut: "/favicon.png",
-    apple: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 
@@ -30,6 +26,7 @@ export default function RootLayout({
     <html lang="uk" className={`${geometria.variable} h-full font-sans`}>
       <body className="min-h-dvh bg-white antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );

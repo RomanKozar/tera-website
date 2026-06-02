@@ -19,7 +19,10 @@ export type NewsItem = {
   title: string;
   excerpt: string;
   image: string;
+  imageAlt?: string;
   status: ContentStatus;
+  paragraphs?: string[];
+  gallery?: { src: string; alt: string }[];
 };
 
 export type HomeProject = {
@@ -59,6 +62,11 @@ export type SiteUi = {
   projectSocialDesc: string;
   backToNews: string;
   newsDraftNotice: string;
+  galleryClose: string;
+  galleryPrevious: string;
+  galleryNext: string;
+  galleryOpenHint: string;
+  galleryCounterOf: string;
   newsFallbackTitle: string;
   facebookPageAria: string;
   address: string;

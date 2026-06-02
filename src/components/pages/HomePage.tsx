@@ -4,13 +4,27 @@ import { getContent } from "@/content";
 import { DecorativeWaves } from "@/components/home/DecorativeWaves";
 import { HomeHeroBanner } from "@/components/home/HomeHeroBanner";
 import { IMAGES } from "@/lib/images";
+import { HOME_NEWS_COUNT, sortNewsByDateDesc } from "@/lib/news-sort";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
+import { getNewsItemsWithFallback } from "@/sanity/lib/news";
 
-export function HomePage({ locale }: { locale: Locale }) {
+function formatDate(date: string, locale: Locale) {
+  return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+export async function HomePage({ locale }: { locale: Locale }) {
   const content = getContent(locale);
   const { home, news, nav, projects, ui } = content;
   const newsBase = localePath(locale, "/novyny");
+
+  const latestNews = sortNewsByDateDesc(
+    await getNewsItemsWithFallback(news),
+  ).slice(0, HOME_NEWS_COUNT);
 
   const quickLinks = [
     {
@@ -38,13 +52,12 @@ export function HomePage({ locale }: { locale: Locale }) {
         <DecorativeWaves />
         <article className="relative mx-auto max-w-7xl px-4 pb-10 pt-2 sm:px-6 lg:px-8 lg:pb-12 lg:pt-3">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {/* Новини */}
             <section className="md:col-span-3">
               <h2 className="mb-6 inline-block border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
                 {home.newsTitle}
               </h2>
               <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {news.map((item) => (
+                {latestNews.map((item) => (
                   <li key={item.slug} className="list-none">
                     <Link
                       href={`${newsBase}/${item.slug}`}
@@ -52,8 +65,8 @@ export function HomePage({ locale }: { locale: Locale }) {
                     >
                       <span className="relative h-44 w-full overflow-hidden bg-tera-nav-bg sm:h-48">
                         <Image
-                          src={IMAGES.map}
-                          alt={item.title}
+                          src={item.image}
+                          alt={item.imageAlt || item.title}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, 33vw"
@@ -64,7 +77,7 @@ export function HomePage({ locale }: { locale: Locale }) {
                           dateTime={item.date}
                           className="text-sm font-medium text-foreground/55"
                         >
-                          {item.date.split("-").reverse().join(".")}
+                          {formatDate(item.date, locale)}
                         </time>
                         <span className="mt-4 text-lg font-bold leading-snug text-tera-navy transition-colors group-hover:text-tera-blue">
                           {item.title}
@@ -88,7 +101,6 @@ export function HomePage({ locale }: { locale: Locale }) {
               </ul>
             </section>
 
-            {/* Швидкі посилання */}
             <section className="rounded-2xl border border-slate-100 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md">
               <h2 className="max-w-[13rem] text-2xl font-bold uppercase leading-tight tracking-wide text-slate-900">
                 {ui.leadershipMembers}
@@ -155,7 +167,6 @@ export function HomePage({ locale }: { locale: Locale }) {
               </ul>
             </section>
 
-            {/* Проекти */}
             <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-r from-tera-nav-bg to-tera-nav-bg-end p-6 shadow-md md:col-span-2">
               <div
                 aria-hidden="true"

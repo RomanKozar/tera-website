@@ -1,8 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortableText } from "@portabletext/react";
+import Image from "next/image";
 import { getContent } from "@/content";
+import { NewsImageGallery } from "@/components/news/NewsImageGallery";
 import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -30,6 +31,22 @@ export async function NewsArticle({
     { day: "numeric", month: "long", year: "numeric" },
   );
 
+  const images = [
+    ...(item.image
+      ? [{ src: item.image, alt: item.imageAlt || item.title }]
+      : []),
+    ...(item.gallery ?? []),
+  ];
+
+  const galleryLabels = {
+    close: ui.galleryClose,
+    previous: ui.galleryPrevious,
+    next: ui.galleryNext,
+    openHint: ui.galleryOpenHint,
+    counterOf: ui.galleryCounterOf,
+    locale,
+  };
+
   return (
     <>
       <PageHeader title={item.title} subtitle={date} />
@@ -37,22 +54,14 @@ export async function NewsArticle({
         <article className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <AccentWaveStack tops={[0, 112, 760]} start="left" />
 
-          <section className="relative z-10 max-w-3xl rounded-2xl border border-slate-100 bg-white p-6 shadow-md sm:p-8">
+          <section className="relative z-10 mx-auto max-w-3xl rounded-2xl border border-slate-100 bg-white p-6 shadow-md sm:p-8">
             <ContentStatusBadge
               status={item.status}
               label={statusLabels[item.status]}
             />
-            {item.image && (
-              <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-xl bg-tera-nav-bg">
-                <Image
-                  src={item.image}
-                  alt={item.imageAlt || item.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 768px"
-                />
-              </div>
-            )}
+            {images.length > 0 ? (
+              <NewsImageGallery images={images} labels={galleryLabels} />
+            ) : null}
             {item.body?.length ? (
               <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
                 <PortableText
@@ -79,6 +88,12 @@ export async function NewsArticle({
                     },
                   }}
                 />
+              </div>
+            ) : item.paragraphs?.length ? (
+              <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
+                {item.paragraphs.map((paragraph) => (
+                  <p key={paragraph.slice(0, 64)}>{paragraph}</p>
+                ))}
               </div>
             ) : (
               <>

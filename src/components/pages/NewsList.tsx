@@ -5,6 +5,7 @@ import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
+import { sortNewsByDateDesc } from "@/lib/news-sort";
 import { getNewsItemsWithFallback } from "@/sanity/lib/news";
 
 function formatDate(date: string, locale: Locale) {
@@ -17,7 +18,7 @@ function formatDate(date: string, locale: Locale) {
 
 export async function NewsList({ locale }: { locale: Locale }) {
   const { news, nav, home } = getContent(locale);
-  const newsItems = await getNewsItemsWithFallback(news);
+  const newsItems = sortNewsByDateDesc(await getNewsItemsWithFallback(news));
   const base = localePath(locale, "/novyny");
 
   return (
@@ -30,29 +31,34 @@ export async function NewsList({ locale }: { locale: Locale }) {
           <ul className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {newsItems.map((item) => (
               <li key={item.slug} className="list-none">
-                <article className="overflow-hidden rounded-xl border border-tera-border bg-white shadow-sm hover:shadow-md">
-                  <Link href={`${base}/${item.slug}`}>
-                    <div className="relative aspect-[16/10] bg-tera-nav-bg">
+                <article className="flex h-full flex-col overflow-hidden rounded-xl border border-tera-border bg-white shadow-sm hover:shadow-md">
+                  <Link
+                    href={`${base}/${item.slug}`}
+                    className="group flex h-full flex-col"
+                  >
+                    <div className="relative aspect-[16/10] shrink-0 bg-tera-nav-bg">
                       <Image
                         src={item.image}
                         alt={item.imageAlt || ""}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     </div>
-                    <div className="p-5">
+                    <div className="flex flex-1 flex-col p-5">
                       <time
                         dateTime={item.date}
                         className="text-xs text-foreground/55"
                       >
                         {formatDate(item.date, locale)}
                       </time>
-                      <h2 className="mt-2 text-lg font-bold text-tera-navy">
+                      <h2 className="mt-2 text-lg font-bold leading-snug text-tera-navy">
                         {item.title}
                       </h2>
-                      <p className="mt-2 text-sm text-foreground/75">{item.excerpt}</p>
-                      <span className="mt-3 inline-block text-sm font-medium text-tera-blue">
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-foreground/75">
+                        {item.excerpt}
+                      </p>
+                      <span className="mt-4 inline-block text-sm font-medium text-tera-blue">
                         {home.readMore} →
                       </span>
                     </div>

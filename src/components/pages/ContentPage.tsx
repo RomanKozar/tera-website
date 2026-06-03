@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
 import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
+import { OpenableImage } from "@/components/ui/image-lightbox/OpenableImage";
 import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { PageContent } from "@/content/types";
@@ -67,16 +67,17 @@ function MaomsTeraPage({
             ) : null}
           </div>
 
-          <div className="relative min-h-[300px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md">
-            <Image
-              src={IMAGES.heroV3}
-              alt={ui.communitiesMapAlt}
-              fill
-              className="object-cover object-[center_10%]"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-tera-navy/50 via-transparent to-transparent" />
+          <OpenableImage
+            groupId="maoms-tera"
+            index={0}
+            src={IMAGES.heroV3}
+            alt={ui.communitiesMapAlt}
+            wrapperClassName="relative min-h-[300px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md"
+            imageClassName="object-cover object-[center_10%]"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            priority
+          >
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tera-navy/50 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/90 p-4 shadow-sm backdrop-blur">
               <p className="text-sm font-semibold uppercase tracking-wide text-tera-blue">
                 {ui.tereblyaValley}
@@ -85,20 +86,20 @@ function MaomsTeraPage({
                 {ui.cooperationTagline}
               </p>
             </div>
-          </div>
+          </OpenableImage>
         </section>
 
         <section className="relative z-10 mt-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr]">
           <aside className="space-y-6">
-            <div className="relative min-h-[260px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md">
-              <Image
-                src={IMAGES.river}
-                alt={ui.riverAlt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 35vw"
-              />
-            </div>
+            <OpenableImage
+              groupId="maoms-tera"
+              index={1}
+              src={IMAGES.river}
+              alt={ui.riverAlt}
+              wrapperClassName="relative min-h-[260px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md"
+              imageClassName="object-cover"
+              sizes="(max-width: 1024px) 100vw, 35vw"
+            />
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md">
               <h2 className="border-b-2 border-tera-gold pb-2 text-xl font-bold uppercase tracking-wide text-tera-navy">
                 {ui.operatingPrinciples}

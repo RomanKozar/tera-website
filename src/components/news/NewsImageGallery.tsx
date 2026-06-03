@@ -139,7 +139,7 @@ export function NewsImageGallery({
           <button
             type="button"
             onClick={close}
-            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-2xl leading-none text-white transition-colors hover:bg-white/25"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-2xl leading-none text-white transition-colors hover:bg-white/25"
             aria-label={labels.close}
           >
             ×
@@ -157,7 +157,7 @@ export function NewsImageGallery({
                   e.stopPropagation();
                   goPrev();
                 }}
-                className="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-2xl text-white transition-colors hover:bg-white/25 sm:left-6 sm:h-12 sm:w-12"
+                className="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/15 text-2xl text-white transition-colors hover:bg-white/25 sm:left-6 sm:h-12 sm:w-12"
                 aria-label={labels.previous}
               >
                 ‹
@@ -168,7 +168,7 @@ export function NewsImageGallery({
                   e.stopPropagation();
                   goNext();
                 }}
-                className="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-2xl text-white transition-colors hover:bg-white/25 sm:right-6 sm:h-12 sm:w-12"
+                className="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/15 text-2xl text-white transition-colors hover:bg-white/25 sm:right-6 sm:h-12 sm:w-12"
                 aria-label={labels.next}
               >
                 ›

@@ -3,6 +3,7 @@ import { getFooterNav, getMainNav } from "@/lib/navigation";
 import { getSiteMeta, localePath, type Locale } from "@/lib/site";
 import { MainNav } from "./MainNav";
 import { SiteFooter } from "./SiteFooter";
+import { SiteShell } from "./SiteShell";
 import { TopBar } from "./TopBar";
 
 export function SiteLayout({
@@ -17,8 +18,17 @@ export function SiteLayout({
   const mainNav = getMainNav(locale, content);
   const footerNav = getFooterNav(locale, content);
   const copyright = `© ${new Date().getFullYear()} ${site.shortName}. ${content.ui.copyrightSuffix}`;
+  const lightboxLabels = {
+    close: content.ui.galleryClose,
+    previous: content.ui.galleryPrevious,
+    next: content.ui.galleryNext,
+    openHint: content.ui.galleryOpenHint,
+    counterOf: content.ui.galleryCounterOf,
+    locale,
+  };
 
   return (
+    <SiteShell labels={lightboxLabels}>
     <div className="flex min-h-dvh flex-col bg-white">
       <div className="sticky top-0 z-50 shadow-sm">
         <TopBar locale={locale} />
@@ -37,5 +47,6 @@ export function SiteLayout({
         copyright={copyright}
       />
     </div>
+    </SiteShell>
   );
 }

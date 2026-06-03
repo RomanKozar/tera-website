@@ -7,7 +7,7 @@ import { IMAGES } from "@/lib/images";
 import { HOME_NEWS_COUNT, sortNewsByDateDesc } from "@/lib/news-sort";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
-import { getNewsItemsWithFallback } from "@/sanity/lib/news";
+import { getNewsItemsWithFirebaseFallback } from "@/lib/firebase/news-server";
 
 function formatDate(date: string, locale: Locale) {
   return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -23,7 +23,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
   const newsBase = localePath(locale, "/novyny");
 
   const latestNews = sortNewsByDateDesc(
-    await getNewsItemsWithFallback(news),
+    await getNewsItemsWithFirebaseFallback(news),
   ).slice(0, HOME_NEWS_COUNT);
 
   const quickLinks = [

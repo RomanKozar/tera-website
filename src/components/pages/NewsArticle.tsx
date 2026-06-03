@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import { getContent } from "@/content";
 import { NewsImageGallery } from "@/components/news/NewsImageGallery";
+import { NewsRichContent } from "@/components/news/NewsRichContent";
 import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
 import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
-import { getNewsItemWithFallback } from "@/sanity/lib/news";
-import { urlForImage } from "@/sanity/lib/image";
+import { getNewsItemWithFirebaseFallback } from "@/lib/firebase/news-server";
 
 export async function NewsArticle({
   locale,
@@ -20,7 +19,7 @@ export async function NewsArticle({
   slug: string;
 }) {
   const { news, statusLabels, nav, ui } = getContent(locale);
-  const item = await getNewsItemWithFallback(slug, news);
+  const item = await getNewsItemWithFirebaseFallback(slug, news);
 
   if (!item) {
     notFound();
@@ -31,12 +30,15 @@ export async function NewsArticle({
     { day: "numeric", month: "long", year: "numeric" },
   );
 
-  const images = [
-    ...(item.image
-      ? [{ src: item.image, alt: item.imageAlt || item.title }]
-      : []),
-    ...(item.gallery ?? []),
-  ];
+  const useRichBody = Boolean(item.bodyHtml);
+  const images = useRichBody
+    ? []
+    : [
+        ...(item.image
+          ? [{ src: item.image, alt: item.imageAlt || item.title }]
+          : []),
+        ...(item.gallery ?? []),
+      ];
 
   const galleryLabels = {
     close: ui.galleryClose,
@@ -62,33 +64,8 @@ export async function NewsArticle({
             {images.length > 0 ? (
               <NewsImageGallery images={images} labels={galleryLabels} />
             ) : null}
-            {item.body?.length ? (
-              <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
-                <PortableText
-                  value={item.body}
-                  components={{
-                    types: {
-                      image: ({ value }) => {
-                        const src = urlForImage(value)
-                          .width(900)
-                          .height(520)
-                          .fit("crop")
-                          .url();
-
-                        return (
-                          <Image
-                            src={src}
-                            alt={value.alt || ""}
-                            width={900}
-                            height={520}
-                            className="my-6 rounded-xl object-cover"
-                          />
-                        );
-                      },
-                    },
-                  }}
-                />
-              </div>
+            {item.bodyHtml ? (
+              <NewsRichContent html={item.bodyHtml} />
             ) : item.paragraphs?.length ? (
               <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
                 {item.paragraphs.map((paragraph) => (

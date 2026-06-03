@@ -5,7 +5,7 @@ export function generateStaticParams() {
   return getContent("en").news.map((item) => ({ slug: item.slug }));
 }
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export default async function NewsItemPage({
   params,

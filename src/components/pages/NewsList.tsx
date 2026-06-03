@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
 import { sortNewsByDateDesc } from "@/lib/news-sort";
-import { getNewsItemsWithFallback } from "@/sanity/lib/news";
+import { getNewsItemsWithFirebaseFallback } from "@/lib/firebase/news-server";
 
 function formatDate(date: string, locale: Locale) {
   return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -18,7 +18,9 @@ function formatDate(date: string, locale: Locale) {
 
 export async function NewsList({ locale }: { locale: Locale }) {
   const { news, nav, home } = getContent(locale);
-  const newsItems = sortNewsByDateDesc(await getNewsItemsWithFallback(news));
+  const newsItems = sortNewsByDateDesc(
+    await getNewsItemsWithFirebaseFallback(news),
+  );
   const base = localePath(locale, "/novyny");
 
   return (

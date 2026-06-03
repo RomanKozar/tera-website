@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
 import { getStatutoryBodies } from "@/content/statutoryBodies";
 import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
+import { OpenableImage } from "@/components/ui/image-lightbox/OpenableImage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { PageContent } from "@/content/types";
 import type { Locale } from "@/lib/site";
@@ -55,19 +55,18 @@ export function StatutoryBodiesPage({
 
             <div className="grid gap-4 sm:grid-cols-2">
               {[IMAGES.photo1, IMAGES.photo2].map((src, idx) => (
-                <div
+                <OpenableImage
                   key={src}
-                  className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-md"
+                  groupId="statutory-meeting"
+                  index={idx}
+                  src={src}
+                  alt={t.photoAlt(idx + 1)}
+                  wrapperClassName="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-md"
+                  imageClassName="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 45vw"
                 >
-                  <Image
-                    src={src}
-                    alt={t.photoAlt(idx + 1)}
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 1024px) 100vw, 45vw"
-                  />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tera-navy/35 via-transparent to-transparent" />
-                </div>
+                </OpenableImage>
               ))}
             </div>
           </section>
@@ -97,16 +96,17 @@ export function StatutoryBodiesPage({
                 ))}
               </ul>
 
-              <div className="relative mt-6 aspect-[16/10] overflow-hidden rounded-2xl border border-tera-border/60 bg-white shadow-sm">
-                <Image
-                  src={SITE_IMAGES.heroV3}
-                  alt={t.communitiesMapAlt}
-                  fill
-                  className="object-cover object-[center_12%]"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
+              <OpenableImage
+                groupId="statutory-map"
+                index={0}
+                src={SITE_IMAGES.heroV3}
+                alt={t.communitiesMapAlt}
+                wrapperClassName="relative mt-6 aspect-[16/10] overflow-hidden rounded-2xl border border-tera-border/60 bg-white shadow-sm"
+                imageClassName="object-cover object-[center_12%]"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              >
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tera-navy/35 via-transparent to-transparent" />
-              </div>
+              </OpenableImage>
             </div>
           </section>
 
@@ -124,15 +124,15 @@ export function StatutoryBodiesPage({
               <p className="mt-3 text-sm leading-relaxed text-slate-700">{t.chairRule}</p>
 
               <div className="mt-6 grid gap-6 sm:grid-cols-[0.9fr_1.1fr] sm:items-start">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-sm">
-                  <Image
-                    src={IMAGES.photo3}
-                    alt={t.chairPhotoAlt}
-                    fill
-                    className="object-cover object-[center_20%] scale-[0.92]"
-                    sizes="(max-width: 1024px) 100vw, 35vw"
-                  />
-                </div>
+                <OpenableImage
+                  groupId="statutory-leaders"
+                  index={0}
+                  src={IMAGES.photo3}
+                  alt={t.chairPhotoAlt}
+                  wrapperClassName="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-sm"
+                  imageClassName="object-cover object-[center_20%] scale-[0.92]"
+                  sizes="(max-width: 1024px) 100vw, 35vw"
+                />
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-wide text-tera-navy">
                     {t.chairBioTitle}
@@ -157,15 +157,15 @@ export function StatutoryBodiesPage({
               <p className="mt-4 text-sm leading-relaxed text-slate-700">{t.directorRule}</p>
 
               <div className="mt-6 grid gap-6 sm:grid-cols-[0.9fr_1.1fr] sm:items-start">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-sm">
-                  <Image
-                    src={IMAGES.photo4}
-                    alt={t.directorPhotoAlt}
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 1024px) 100vw, 35vw"
-                  />
-                </div>
+                <OpenableImage
+                  groupId="statutory-leaders"
+                  index={1}
+                  src={IMAGES.photo4}
+                  alt={t.directorPhotoAlt}
+                  wrapperClassName="relative aspect-[4/3] overflow-hidden rounded-2xl border border-tera-border/60 bg-tera-nav-bg shadow-sm"
+                  imageClassName="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 35vw"
+                />
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-wide text-tera-navy">
                     {t.directorBioTitle}

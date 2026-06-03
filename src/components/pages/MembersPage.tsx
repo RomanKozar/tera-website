@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getContent } from "@/content";
 import { getMembers, zakarpattyaMapUrl } from "@/content/members";
 import { AccentWaveStack } from "@/components/ui/AccentWaveStack";
+import { OpenableImage } from "@/components/ui/image-lightbox/OpenableImage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { PageContent } from "@/content/types";
 import type { Locale } from "@/lib/site";
@@ -91,16 +91,17 @@ export function MembersPage({
                     className={`mt-8 grid gap-8 lg:grid-cols-2 lg:items-start ${reversed ? "lg:[&>*:first-child]:order-2" : ""}`}
                   >
                     <div className="flex w-full flex-col items-center gap-4 self-start">
-                      <div className="relative aspect-[4/3] w-full max-w-[520px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md">
-                        <Image
-                          src={member.image}
-                          alt={member.imageAlt}
-                          fill
-                          className="object-cover object-center"
-                          sizes="(max-width: 1024px) 100vw, 42vw"
-                        />
+                      <OpenableImage
+                        groupId="members"
+                        index={index}
+                        src={member.image}
+                        alt={member.imageAlt}
+                        wrapperClassName="relative aspect-[4/3] w-full max-w-[520px] overflow-hidden rounded-2xl border border-tera-border/60 shadow-md"
+                        imageClassName="object-cover object-center"
+                        sizes="(max-width: 1024px) 100vw, 42vw"
+                      >
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tera-navy/40 via-transparent to-transparent" />
-                      </div>
+                      </OpenableImage>
                     </div>
 
                     <div className="space-y-6">

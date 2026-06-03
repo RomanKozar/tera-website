@@ -22,6 +22,7 @@ export type NewsItem = {
   imageAlt?: string;
   status: ContentStatus;
   paragraphs?: string[];
+  bodyHtml?: string;
   gallery?: { src: string; alt: string }[];
 };
 

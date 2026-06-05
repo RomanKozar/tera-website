@@ -6,6 +6,12 @@ import { firebaseConfig, isFirebaseConfigured } from "./config";
 import type { JSONContent } from "@tiptap/core";
 import type { Locale } from "@/lib/site";
 import type { FirebaseNewsDoc, FirebaseNewsStatus } from "./news-types";
+import {
+  hasNewsCoverImage,
+  newsCoverImage,
+  newsPlaceholderAlt,
+} from "@/lib/news-cover";
+import { compareNewsPublishedAtDesc } from "@/lib/news-published-at";
 import { extractFirstImageSrc } from "@/lib/rich-text";
 
 const COLLECTION = "news";
@@ -45,7 +51,12 @@ function pickLocalizedJson(
 function mapToNewsItem(
   docData: FirebaseNewsDoc,
   locale: Locale,
-): NewsItem & { paragraphs?: string[] } {
+): NewsItem & {
+  paragraphs?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  id?: string;
+} {
   const title = pickLocalized(docData, locale, "title");
   const excerpt = pickLocalized(docData, locale, "excerpt");
   const bodyText = pickLocalized(docData, locale, "body");
@@ -72,16 +83,22 @@ function mapToNewsItem(
         : [];
 
   const [first, ...rest] = imgs;
-  const imageAlt =
-    pickLocalized(docData, locale, "imageAlt") || first?.alt || title;
+  const coverUrl = first?.url;
+  const hasCover = hasNewsCoverImage(coverUrl);
+  const imageAlt = hasCover
+    ? pickLocalized(docData, locale, "imageAlt") || first?.alt || title
+    : newsPlaceholderAlt(locale);
 
   return {
     slug,
     date: docData.publishedAt,
+    createdAt: docData.createdAt,
+    updatedAt: docData.updatedAt,
+    id: docData.id,
     title,
     excerpt,
-    image: first?.url ?? "",
-    imageAlt: imageAlt || undefined,
+    image: newsCoverImage(coverUrl),
+    imageAlt,
     bodyHtml: bodyHtml || undefined,
     gallery: bodyHtml
       ? []
@@ -172,7 +189,7 @@ export async function fetchPublishedNewsDocs(): Promise<FirebaseNewsDoc[]> {
     const snap = await getDocs(q);
     return snap.docs
       .map((d) => parseDoc(d.id, d.data()))
-      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+      .sort(compareNewsPublishedAtDesc);
   } catch (error) {
     console.error("[firebase] fetchPublishedNewsDocs failed:", error);
     return [];

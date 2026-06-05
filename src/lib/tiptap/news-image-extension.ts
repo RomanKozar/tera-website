@@ -11,7 +11,7 @@ export const NewsImage = Image.extend({
     }
 
     const resizeOptions = this.options.resize;
-    const extension = this;
+    const extensionName = this.name;
 
     return ({ node, getPos, HTMLAttributes, editor }) => {
       const el = document.createElement("img");
@@ -67,7 +67,7 @@ export const NewsImage = Image.extend({
           editor
             .chain()
             .setNodeSelection(pos)
-            .updateAttributes(extension.name, { width, height })
+            .updateAttributes(extensionName, { width, height })
             .run();
         },
         onUpdate: (updatedNode) => {

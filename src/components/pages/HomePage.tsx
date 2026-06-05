@@ -8,6 +8,7 @@ import { HOME_NEWS_COUNT, sortNewsByDateDesc } from "@/lib/news-sort";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
 import { getNewsItemsWithFirebaseFallback } from "@/lib/firebase/news-server";
+import { newsCoverImage } from "@/lib/news-cover";
 
 function formatDate(date: string, locale: Locale) {
   return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -57,7 +58,10 @@ export async function HomePage({ locale }: { locale: Locale }) {
                 {home.newsTitle}
               </h2>
               <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {latestNews.map((item) => (
+                {latestNews.map((item) => {
+                  const coverSrc = newsCoverImage(item.image);
+
+                  return (
                   <li key={item.slug} className="list-none">
                     <Link
                       href={`${newsBase}/${item.slug}`}
@@ -65,7 +69,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
                     >
                       <span className="relative h-44 w-full overflow-hidden bg-tera-nav-bg sm:h-48">
                         <Image
-                          src={item.image}
+                          src={coverSrc}
                           alt={item.imageAlt || item.title}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -97,7 +101,8 @@ export async function HomePage({ locale }: { locale: Locale }) {
                       </span>
                     </Link>
                   </li>
-                ))}
+                );
+                })}
               </ul>
             </section>
 

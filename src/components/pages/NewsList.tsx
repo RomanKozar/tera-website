@@ -7,6 +7,7 @@ import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
 import { sortNewsByDateDesc } from "@/lib/news-sort";
 import { getNewsItemsWithFirebaseFallback } from "@/lib/firebase/news-server";
+import { newsCoverImage } from "@/lib/news-cover";
 
 function formatDate(date: string, locale: Locale) {
   return new Date(date).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -31,7 +32,10 @@ export async function NewsList({ locale }: { locale: Locale }) {
           <AccentWaveStack tops={[0, 224, 720]} start="left" />
 
           <ul className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {newsItems.map((item) => (
+            {newsItems.map((item) => {
+              const coverSrc = newsCoverImage(item.image);
+
+              return (
               <li key={item.slug} className="list-none">
                 <article className="flex h-full flex-col overflow-hidden rounded-xl border border-tera-border bg-white shadow-sm hover:shadow-md">
                   <Link
@@ -40,8 +44,8 @@ export async function NewsList({ locale }: { locale: Locale }) {
                   >
                     <div className="relative aspect-[16/10] shrink-0 bg-tera-nav-bg">
                       <Image
-                        src={item.image}
-                        alt={item.imageAlt || ""}
+                        src={coverSrc}
+                        alt={item.imageAlt || item.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 33vw"
@@ -67,7 +71,8 @@ export async function NewsList({ locale }: { locale: Locale }) {
                   </Link>
                 </article>
               </li>
-            ))}
+            );
+            })}
           </ul>
         </div>
       </section>

@@ -25,11 +25,3 @@ export async function fetchAutoEnglishTranslation(input: {
 
   return data;
 }
-
-export function shouldAutoTranslateEnglish(
-  titleEn: string,
-  excerptEn: string,
-  bodyEn: string,
-): boolean {
-  return !titleEn.trim() && !excerptEn.trim() && !bodyEn.trim();
-}

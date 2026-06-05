@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { getContent } from "@/content";
 import { NewsImageGallery } from "@/components/news/NewsImageGallery";
 import { NewsRichContent } from "@/components/news/NewsRichContent";
@@ -10,6 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import type { Locale } from "@/lib/site";
 import { localePath } from "@/lib/site";
 import { getNewsItemWithFirebaseFallback } from "@/lib/firebase/news-server";
+import { hasNewsCoverImage, newsCoverImage } from "@/lib/news-cover";
 
 export async function NewsArticle({
   locale,
@@ -31,11 +31,12 @@ export async function NewsArticle({
   );
 
   const useRichBody = Boolean(item.bodyHtml);
+  // Фото в редакторі вже є в bodyHtml — окрему галерею зверху не показуємо
   const images = useRichBody
     ? []
     : [
-        ...(item.image
-          ? [{ src: item.image, alt: item.imageAlt || item.title }]
+        ...(hasNewsCoverImage(item.image)
+          ? [{ src: newsCoverImage(item.image), alt: item.imageAlt || item.title }]
           : []),
         ...(item.gallery ?? []),
       ];

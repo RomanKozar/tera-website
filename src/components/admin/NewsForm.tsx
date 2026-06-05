@@ -4,7 +4,11 @@ import type { JSONContent } from "@tiptap/core";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import type { FirebaseNewsDoc, FirebaseNewsStatus } from "@/lib/firebase/news-types";
+import type {
+  FirebaseNewsDoc,
+  FirebaseNewsStatus,
+  NewsImageItem,
+} from "@/lib/firebase/news-types";
 import {
   extractFirstImageSrc,
   MAX_INLINE_IMAGES,
@@ -15,11 +19,9 @@ import {
   slugifyTitle,
   updateNewsAdmin,
 } from "@/lib/firebase/news-admin";
+import { buildNewsPublishedAt } from "@/lib/news-published-at";
 import { revalidatePublicSite } from "@/lib/revalidate-public";
-import {
-  fetchAutoEnglishTranslation,
-  shouldAutoTranslateEnglish,
-} from "@/lib/translate/client";
+import { fetchAutoEnglishTranslation } from "@/lib/translate/client";
 
 type Props = {
   initial?: FirebaseNewsDoc;
@@ -31,31 +33,187 @@ type EditorPayload = {
   text: string;
 };
 
-function todayDateInputValue() {
-  return new Date().toISOString().slice(0, 10);
+const UK_MONTHS = [
+  "Січень",
+  "Лютий",
+  "Березень",
+  "Квітень",
+  "Травень",
+  "Червень",
+  "Липень",
+  "Серпень",
+  "Вересень",
+  "Жовтень",
+  "Листопад",
+  "Грудень",
+] as const;
+
+function todayParts() {
+  const now = new Date();
+  return {
+    day: now.getDate(),
+    month: now.getMonth() + 1,
+    year: now.getFullYear(),
+  };
+}
+
+function parsePublishedDate(iso?: string) {
+  if (iso?.slice(0, 10)) {
+    const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
+    if (year && month && day) {
+      return { day, month, year };
+    }
+  }
+  return todayParts();
+}
+
+function daysInMonth(month: number, year: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function NewsDateFields({
+  day,
+  month,
+  year,
+  onChange,
+}: {
+  day: number;
+  month: number;
+  year: number;
+  onChange: (next: { day: number; month: number; year: number }) => void;
+}) {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 8 }, (_, i) => currentYear - 3 + i);
+  const maxDay = daysInMonth(month, year);
+  const safeDay = Math.min(day, maxDay);
+
+  const selectClass =
+    "cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm";
+
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-2">
+      <label className="flex items-center gap-1.5 text-sm text-slate-600">
+        <span className="sr-only">День</span>
+        <select
+          className={`${selectClass} min-w-[4.5rem]`}
+          value={safeDay}
+          onChange={(e) =>
+            onChange({ day: Number(e.target.value), month, year })
+          }
+          aria-label="День"
+        >
+          {Array.from({ length: maxDay }, (_, i) => i + 1).map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+        <span>/</span>
+      </label>
+
+      <label className="flex min-w-[8.5rem] flex-1 items-center gap-1.5 text-sm text-slate-600 sm:max-w-[11rem]">
+        <span className="sr-only">Місяць</span>
+        <select
+          className={`${selectClass} w-full`}
+          value={month}
+          onChange={(e) => {
+            const nextMonth = Number(e.target.value);
+            const nextMax = daysInMonth(nextMonth, year);
+            onChange({
+              day: Math.min(safeDay, nextMax),
+              month: nextMonth,
+              year,
+            });
+          }}
+          aria-label="Місяць"
+        >
+          {UK_MONTHS.map((name, index) => (
+            <option key={name} value={index + 1}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <span>/</span>
+      </label>
+
+      <label className="flex items-center gap-1.5 text-sm text-slate-600">
+        <span className="sr-only">Рік</span>
+        <select
+          className={`${selectClass} min-w-[5.5rem]`}
+          value={year}
+          onChange={(e) => {
+            const nextYear = Number(e.target.value);
+            const nextMax = daysInMonth(month, nextYear);
+            onChange({
+              day: Math.min(safeDay, nextMax),
+              month,
+              year: nextYear,
+            });
+          }}
+          aria-label="Рік"
+        >
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
+function resolveNewsImages(
+  json: JSONContent,
+  html: string,
+  initial: FirebaseNewsDoc | undefined,
+  coverAlt: string,
+): { imageUrl: string; imageAlt: string; images: NewsImageItem[] } {
+  const fromEditor = extractFirstImageSrc(json, html);
+  if (fromEditor) {
+    return {
+      imageUrl: fromEditor,
+      imageAlt: coverAlt,
+      images: [{ url: fromEditor, alt: coverAlt }],
+    };
+  }
+
+  if (initial?.images?.length) {
+    const first = initial.images[0]!;
+    return {
+      imageUrl: first.url,
+      imageAlt: first.alt || coverAlt,
+      images: initial.images,
+    };
+  }
+
+  if (initial?.imageUrl) {
+    return {
+      imageUrl: initial.imageUrl,
+      imageAlt: initial.imageAlt || coverAlt,
+      images: [{ url: initial.imageUrl, alt: initial.imageAlt || coverAlt }],
+    };
+  }
+
+  return { imageUrl: "", imageAlt: coverAlt, images: [] };
 }
 
 function buildInitialEditorPayload(
   initial: FirebaseNewsDoc | undefined,
-  lang: "uk" | "en",
 ): EditorPayload | null {
   if (!initial) {
     return null;
   }
 
-  const bodyJson = lang === "en" ? initial.bodyJsonEn : initial.bodyJson;
-  const bodyHtml = lang === "en" ? initial.bodyHtmlEn : initial.bodyHtml;
-  const body = lang === "en" ? initial.bodyEn : initial.body;
-
-  if (bodyJson && bodyHtml) {
+  if (initial.bodyJson && initial.bodyHtml) {
     return {
-      json: bodyJson as JSONContent,
-      html: bodyHtml,
-      text: body ?? "",
+      json: initial.bodyJson as JSONContent,
+      html: initial.bodyHtml,
+      text: initial.body,
     };
   }
-  if (body) {
-    return { json: plainTextToEditorDoc(body), html: "", text: body };
+  if (initial.body) {
+    return { json: plainTextToEditorDoc(initial.body), html: "", text: initial.body };
   }
   return null;
 }
@@ -66,7 +224,6 @@ export function NewsForm({ initial }: Props) {
     () => initial?.id ?? `draft-${crypto.randomUUID()}`,
     [initial?.id],
   );
-  const storageIdEn = `${storageId}-en`;
 
   const initialEditorContent = useMemo(() => {
     if (initial?.bodyJson) {
@@ -76,30 +233,15 @@ export function NewsForm({ initial }: Props) {
       return plainTextToEditorDoc(initial.body);
     }
     return undefined;
-  }, [initial?.bodyJson, initial?.body]);
-
-  const initialEditorContentEn = useMemo(() => {
-    if (initial?.bodyJsonEn) {
-      return initial.bodyJsonEn as JSONContent;
-    }
-    if (initial?.bodyEn) {
-      return plainTextToEditorDoc(initial.bodyEn);
-    }
-    return undefined;
-  }, [initial?.bodyJsonEn, initial?.bodyEn]);
+  }, [initial]);
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [titleEn, setTitleEn] = useState(initial?.titleEn ?? "");
-  const [excerptEn, setExcerptEn] = useState(initial?.excerptEn ?? "");
   const [editorPayload, setEditorPayload] = useState<EditorPayload | null>(() =>
-    buildInitialEditorPayload(initial, "uk"),
+    buildInitialEditorPayload(initial),
   );
-  const [editorEnPayload, setEditorEnPayload] = useState<EditorPayload | null>(
-    () => buildInitialEditorPayload(initial, "en"),
-  );
-  const [publishedAt, setPublishedAt] = useState(
-    initial?.publishedAt?.slice(0, 10) ?? todayDateInputValue(),
+  const [publishedDate, setPublishedDate] = useState(() =>
+    parsePublishedDate(initial?.publishedAt),
   );
   const [status, setStatus] = useState<FirebaseNewsStatus>(
     initial?.status ?? "draft",
@@ -109,7 +251,6 @@ export function NewsForm({ initial }: Props) {
   const [error, setError] = useState("");
 
   const slugPreview = slugifyTitle(title);
-  const slugEnPreview = titleEn.trim() ? slugifyTitle(titleEn) : "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,50 +260,39 @@ export function NewsForm({ initial }: Props) {
     const html = editorPayload?.html.trim() ?? "";
     const json = editorPayload?.json;
 
-    const textEn = editorEnPayload?.text.trim() ?? "";
-    const htmlEn = editorEnPayload?.html.trim() ?? "";
-    const jsonEn = editorEnPayload?.json;
-
     if (!title.trim()) {
-      setError("Вкажіть заголовок (українською).");
+      setError("Вкажіть заголовок.");
       return;
     }
     if (!text) {
-      setError("Вкажіть текст новини (українською).");
+      setError("Вкажіть текст новини.");
       return;
     }
     if (!json) {
       setError("Редактор ще завантажується. Зачекайте секунду.");
       return;
     }
+
     setSaving(true);
 
     try {
-      let resolvedTitleEn = titleEn.trim();
-      let resolvedExcerptEn = excerptEn.trim();
-      let resolvedTextEn = textEn;
-      let resolvedHtmlEn = htmlEn;
-      let resolvedJsonEn = jsonEn as Record<string, unknown> | null;
+      setTranslating(true);
+      const translated = await fetchAutoEnglishTranslation({
+        title: title.trim(),
+        excerpt: excerpt.trim(),
+        body: text,
+        bodyJson: json,
+      });
+      setTranslating(false);
 
-      if (shouldAutoTranslateEnglish(resolvedTitleEn, resolvedExcerptEn, resolvedTextEn)) {
-        setTranslating(true);
-        const translated = await fetchAutoEnglishTranslation({
-          title: title.trim(),
-          excerpt: excerpt.trim(),
-          body: text,
-          bodyJson: json,
-        });
-        resolvedTitleEn = translated.titleEn;
-        resolvedExcerptEn = translated.excerptEn;
-        resolvedTextEn = translated.bodyEn;
-        resolvedHtmlEn = translated.bodyHtmlEn;
-        resolvedJsonEn = translated.bodyJsonEn;
-        setTranslating(false);
-      }
-
-      const finalSlug = slugifyTitle(title);
-      const coverUrl = extractFirstImageSrc(json, html) ?? "";
+      const finalSlug = initial?.slug?.trim() || slugifyTitle(title);
       const coverAlt = title.trim();
+      const { imageUrl, imageAlt, images } = resolveNewsImages(
+        json,
+        html,
+        initial,
+        coverAlt,
+      );
       const payload = {
         title: title.trim(),
         slug: finalSlug,
@@ -170,20 +300,23 @@ export function NewsForm({ initial }: Props) {
         body: text,
         bodyJson: json as Record<string, unknown>,
         bodyHtml: html,
-        titleEn: resolvedTitleEn,
-        slugEn: resolvedTitleEn ? slugifyTitle(resolvedTitleEn) : "",
-        excerptEn: resolvedExcerptEn,
-        bodyEn: resolvedTextEn,
-        bodyJsonEn: resolvedJsonEn,
-        bodyHtmlEn: resolvedHtmlEn,
-        imageAltEn: resolvedTitleEn || coverAlt,
-        publishedAt: new Date(publishedAt).toISOString(),
+        titleEn: translated.titleEn,
+        slugEn: translated.titleEn ? slugifyTitle(translated.titleEn) : "",
+        excerptEn: translated.excerptEn,
+        bodyEn: translated.bodyEn,
+        bodyJsonEn: translated.bodyJsonEn,
+        bodyHtmlEn: translated.bodyHtmlEn,
+        imageAltEn: translated.titleEn || coverAlt,
+        publishedAt: buildNewsPublishedAt(
+          publishedDate.day,
+          publishedDate.month,
+          publishedDate.year,
+          initial?.id ? initial.publishedAt : undefined,
+        ),
         status,
-        imageUrl: coverUrl,
-        imageAlt: coverAlt,
-        images: coverUrl
-          ? [{ url: coverUrl, alt: coverAlt }]
-          : [],
+        imageUrl,
+        imageAlt,
+        images,
       };
 
       let docId = initial?.id;
@@ -211,112 +344,85 @@ export function NewsForm({ initial }: Props) {
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       ) : null}
 
-      <fieldset className="space-y-5 rounded-lg border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-semibold text-tera-navy">
-          Українська версія ( /novyny )
-        </legend>
-
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Заголовок *</span>
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          {slugPreview ? (
-            <p className="mt-1 text-xs text-slate-500">
-              Посилання:{" "}
-              <span className="font-mono text-tera-blue">/novyny/{slugPreview}</span>
-            </p>
-          ) : null}
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Короткий опис</span>
-          <textarea
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
-            rows={3}
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-          />
-        </label>
-
-        <div className="block">
-          <span className="text-sm font-medium text-slate-700">Текст новини *</span>
-          <p className="mt-0.5 text-xs text-slate-500">
-            «2 в ряд» — два фото поруч. До {MAX_INLINE_IMAGES} фото, до 10 МБ.
-          </p>
-          <div className="mt-2">
-            <RichTextEditor
-              storageId={storageId}
-              initialContent={initialEditorContent}
-              onChange={setEditorPayload}
-              onError={setError}
-            />
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset className="space-y-5 rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-        <legend className="px-1 text-sm font-semibold text-tera-navy">
-          English version ( /en/novyny )
-        </legend>
-        <p className="text-xs text-slate-500">
-          Можна залишити порожнім — при збереженні текст автоматично перекладається
-          українською → англійською для /en/novyny. Або заповніть вручну, якщо потрібен
-          свій переклад.
-        </p>
-
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Title</span>
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
-            value={titleEn}
-            onChange={(e) => setTitleEn(e.target.value)}
-          />
-          {slugEnPreview ? (
-            <p className="mt-1 text-xs text-slate-500">
-              Link:{" "}
-              <span className="font-mono text-tera-blue">
-                /en/novyny/{slugEnPreview}
-              </span>
-            </p>
-          ) : null}
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Short description</span>
-          <textarea
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
-            rows={3}
-            value={excerptEn}
-            onChange={(e) => setExcerptEn(e.target.value)}
-          />
-        </label>
-
-        <div className="block">
-          <span className="text-sm font-medium text-slate-700">Article text</span>
-          <div className="mt-2">
-            <RichTextEditor
-              storageId={storageIdEn}
-              initialContent={initialEditorContentEn}
-              onChange={setEditorEnPayload}
-              onError={setError}
-            />
-          </div>
-        </div>
-      </fieldset>
+      <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+        <p className="font-medium text-slate-700">Як заповнити новину:</p>
+        <ul className="mt-1 list-inside list-disc space-y-1">
+          <li>
+            <span className="font-medium">Заголовок</span> — назва новини.
+            <span className="block pl-4 text-slate-500">
+              Показується на головній (блок «Новини ТеРА»), у списку новин і великим
+              текстом у шапці сторінки статті.
+            </span>
+          </li>
+          <li>
+            <span className="font-medium">Короткий опис</span> — 1–3 речення.
+            <span className="block pl-4 text-slate-500">
+              Показується під заголовком у картці на головній та в списку новин (перед
+              «Детальніше»).
+            </span>
+          </li>
+          <li>
+            <span className="font-medium">Текст новини</span> — повний текст; можна
+            додавати фото в редакторі.
+            <span className="block pl-4 text-slate-500">
+              Показується на сторінці статті під датою. Перше фото в тексті —
+              обкладинка в картці на головній і в списку.
+            </span>
+          </li>
+        </ul>
+      </div>
 
       <label className="block">
-        <span className="text-sm font-medium text-slate-700">Дата публікації</span>
+        <span className="text-sm font-medium text-slate-700">Заголовок *</span>
         <input
-          type="date"
-          className="mt-1 w-full cursor-pointer rounded-lg border border-slate-200 px-3 py-2"
-          value={publishedAt}
-          onChange={(e) => setPublishedAt(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        {slugPreview ? (
+          <p className="mt-1 text-xs text-slate-500">
+            Посилання:{" "}
+            <span className="font-mono text-tera-blue">/novyny/{slugPreview}</span>
+          </p>
+        ) : null}
+      </label>
+
+      <div className="block">
+        <span className="text-sm font-medium text-slate-700">Дата публікації</span>
+        <p className="mt-0.5 text-xs text-slate-500">День / місяць / рік</p>
+        <NewsDateFields
+          day={publishedDate.day}
+          month={publishedDate.month}
+          year={publishedDate.year}
+          onChange={setPublishedDate}
+        />
+      </div>
+
+      <label className="block">
+        <span className="text-sm font-medium text-slate-700">Короткий опис</span>
+        <textarea
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+          rows={3}
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
         />
       </label>
+
+      <div className="block">
+        <span className="text-sm font-medium text-slate-700">Текст новини *</span>
+        <p className="mt-0.5 text-xs text-slate-500">
+          «2 в ряд» — два фото поруч. До {MAX_INLINE_IMAGES} фото, до 10 МБ.
+        </p>
+        <div className="mt-2">
+          <RichTextEditor
+            storageId={storageId}
+            initialContent={initialEditorContent}
+            onChange={setEditorPayload}
+            onError={setError}
+          />
+        </div>
+      </div>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium text-slate-700">Статус</legend>

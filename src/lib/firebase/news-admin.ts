@@ -16,6 +16,7 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { getClientFirestore, getClientStorage } from "./client";
+import { compareNewsPublishedAtDesc } from "@/lib/news-published-at";
 import type {
   FirebaseNewsDoc,
   FirebaseNewsInput,
@@ -114,12 +115,16 @@ export function normalizeNewsInput(
   return { ...input, ...syncLegacyImageFields(input.images) };
 }
 
+export function sortNewsAdminDocs(docs: FirebaseNewsDoc[]): FirebaseNewsDoc[] {
+  return [...docs].sort((a, b) => compareNewsPublishedAtDesc(a, b));
+}
+
 export async function listAllNewsAdmin(): Promise<FirebaseNewsDoc[]> {
   const db = getClientFirestore();
   const snap = await getDocs(collection(db, COLLECTION));
-  return snap.docs
-    .map((d) => parseDoc(d.id, d.data() as Record<string, unknown>))
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return sortNewsAdminDocs(
+    snap.docs.map((d) => parseDoc(d.id, d.data() as Record<string, unknown>)),
+  );
 }
 
 export async function listAllNewsAdminWithTimeout(

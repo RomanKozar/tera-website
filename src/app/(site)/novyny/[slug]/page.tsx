@@ -5,7 +5,7 @@ import { fetchPublishedSlugs } from "@/lib/firebase/news-server";
 
 export async function generateStaticParams() {
   if (isFirebaseConfigured()) {
-    const slugs = await fetchPublishedSlugs();
+    const slugs = await fetchPublishedSlugs("uk");
     return slugs.map((slug) => ({ slug }));
   }
   return getContent("uk").news.map((item) => ({ slug: item.slug }));

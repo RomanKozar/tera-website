@@ -23,7 +23,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
   const newsBase = localePath(locale, "/novyny");
 
   const latestNews = sortNewsByDateDesc(
-    await getNewsItemsWithFirebaseFallback(news),
+    await getNewsItemsWithFirebaseFallback(news, locale),
   ).slice(0, HOME_NEWS_COUNT);
 
   const quickLinks = [

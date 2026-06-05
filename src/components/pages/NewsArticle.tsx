@@ -19,7 +19,7 @@ export async function NewsArticle({
   slug: string;
 }) {
   const { news, statusLabels, nav, ui } = getContent(locale);
-  const item = await getNewsItemWithFirebaseFallback(slug, news);
+  const item = await getNewsItemWithFirebaseFallback(slug, news, locale);
 
   if (!item) {
     notFound();
@@ -65,9 +65,12 @@ export async function NewsArticle({
               <NewsImageGallery images={images} labels={galleryLabels} />
             ) : null}
             {item.bodyHtml ? (
-              <NewsRichContent html={item.bodyHtml} />
+              <NewsRichContent html={item.bodyHtml} locale={locale} />
             ) : item.paragraphs?.length ? (
-              <div className="prose-tera mt-6 text-base leading-relaxed text-foreground/90">
+              <div
+                lang={locale === "en" ? "en" : "uk"}
+                className="prose-tera mt-6 text-base leading-relaxed text-foreground/90"
+              >
                 {item.paragraphs.map((paragraph) => (
                   <p key={paragraph.slice(0, 64)}>{paragraph}</p>
                 ))}

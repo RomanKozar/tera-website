@@ -4,6 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import type { NewsItem } from "@/content/types";
 import { firebaseConfig, isFirebaseConfigured } from "./config";
 import type { JSONContent } from "@tiptap/core";
+import type { Locale } from "@/lib/site";
 import type { FirebaseNewsDoc, FirebaseNewsStatus } from "./news-types";
 import { extractFirstImageSrc } from "@/lib/rich-text";
 
@@ -15,16 +16,50 @@ function getServerFirestore() {
   return getFirestore(app);
 }
 
-function mapToNewsItem(docData: FirebaseNewsDoc): NewsItem & {
-  paragraphs?: string[];
-} {
-  const bodyHtml = docData.bodyHtml?.trim();
-  const bodyJson = docData.bodyJson as JSONContent | null | undefined;
+function pickLocalized(
+  doc: FirebaseNewsDoc,
+  locale: Locale,
+  field: "title" | "excerpt" | "body" | "bodyHtml" | "imageAlt",
+): string {
+  if (locale === "en") {
+    const enKey = `${field}En` as keyof FirebaseNewsDoc;
+    const enValue = doc[enKey];
+    if (typeof enValue === "string" && enValue.trim()) {
+      return enValue.trim();
+    }
+  }
+  const value = doc[field];
+  return typeof value === "string" ? value : "";
+}
+
+function pickLocalizedJson(
+  doc: FirebaseNewsDoc,
+  locale: Locale,
+): JSONContent | null | undefined {
+  if (locale === "en" && doc.bodyJsonEn) {
+    return doc.bodyJsonEn as JSONContent;
+  }
+  return doc.bodyJson as JSONContent | null | undefined;
+}
+
+function mapToNewsItem(
+  docData: FirebaseNewsDoc,
+  locale: Locale,
+): NewsItem & { paragraphs?: string[] } {
+  const title = pickLocalized(docData, locale, "title");
+  const excerpt = pickLocalized(docData, locale, "excerpt");
+  const bodyText = pickLocalized(docData, locale, "body");
+  const bodyHtml = pickLocalized(docData, locale, "bodyHtml");
+  const bodyJson = pickLocalizedJson(docData, locale);
+  const slug =
+    locale === "en" && docData.slugEn?.trim()
+      ? docData.slugEn.trim()
+      : docData.slug;
 
   const paragraphs = bodyHtml
     ? undefined
-    : docData.body
-      ? docData.body.split(/\n\n+/).map((p) => p.trim()).filter(Boolean)
+    : bodyText
+      ? bodyText.split(/\n\n+/).map((p) => p.trim()).filter(Boolean)
       : undefined;
 
   const coverFromContent = extractFirstImageSrc(bodyJson, bodyHtml);
@@ -37,20 +72,22 @@ function mapToNewsItem(docData: FirebaseNewsDoc): NewsItem & {
         : [];
 
   const [first, ...rest] = imgs;
+  const imageAlt =
+    pickLocalized(docData, locale, "imageAlt") || first?.alt || title;
 
   return {
-    slug: docData.slug,
+    slug,
     date: docData.publishedAt,
-    title: docData.title,
-    excerpt: docData.excerpt,
+    title,
+    excerpt,
     image: first?.url ?? "",
-    imageAlt: first?.alt || undefined,
+    imageAlt: imageAlt || undefined,
     bodyHtml: bodyHtml || undefined,
     gallery: bodyHtml
       ? []
       : rest.map((img) => ({
           src: img.url,
-          alt: img.alt || docData.title,
+          alt: pickLocalized(docData, locale, "imageAlt") || img.alt || title,
         })),
     status: docData.status === "published" ? "ready" : "draft",
     paragraphs,
@@ -99,6 +136,16 @@ function parseDoc(id: string, data: Record<string, unknown>): FirebaseNewsDoc {
         ? (data.bodyJson as Record<string, unknown>)
         : null,
     bodyHtml: String(data.bodyHtml ?? ""),
+    titleEn: String(data.titleEn ?? ""),
+    slugEn: String(data.slugEn ?? ""),
+    excerptEn: String(data.excerptEn ?? ""),
+    bodyEn: String(data.bodyEn ?? ""),
+    bodyJsonEn:
+      data.bodyJsonEn && typeof data.bodyJsonEn === "object"
+        ? (data.bodyJsonEn as Record<string, unknown>)
+        : null,
+    bodyHtmlEn: String(data.bodyHtmlEn ?? ""),
+    imageAltEn: String(data.imageAltEn ?? ""),
     publishedAt: String(
       data.publishedAt ?? new Date().toISOString().slice(0, 10),
     ),
@@ -111,9 +158,7 @@ function parseDoc(id: string, data: Record<string, unknown>): FirebaseNewsDoc {
   };
 }
 
-export async function fetchPublishedNews(): Promise<
-  (NewsItem & { paragraphs?: string[] })[]
-> {
+export async function fetchPublishedNewsDocs(): Promise<FirebaseNewsDoc[]> {
   if (!isFirebaseConfigured()) {
     return [];
   }
@@ -127,43 +172,59 @@ export async function fetchPublishedNews(): Promise<
     const snap = await getDocs(q);
     return snap.docs
       .map((d) => parseDoc(d.id, d.data()))
-      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-      .map(mapToNewsItem);
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   } catch (error) {
-    console.error("[firebase] fetchPublishedNews failed:", error);
+    console.error("[firebase] fetchPublishedNewsDocs failed:", error);
     return [];
   }
 }
 
-/** Без окремого запиту slug+status (не потрібен composite index у Firestore). */
-export async function fetchPublishedNewsBySlug(
-  slug: string,
-): Promise<(NewsItem & { paragraphs?: string[] }) | null> {
-  const items = await fetchPublishedNews();
-  return items.find((item) => item.slug === slug) ?? null;
+export async function fetchPublishedNews(
+  locale: Locale = "uk",
+): Promise<(NewsItem & { paragraphs?: string[] })[]> {
+  const docs = await fetchPublishedNewsDocs();
+  return docs.map((doc) => mapToNewsItem(doc, locale));
 }
 
-export async function fetchPublishedSlugs(): Promise<string[]> {
-  const items = await fetchPublishedNews();
+export async function fetchPublishedNewsBySlug(
+  slug: string,
+  locale: Locale = "uk",
+): Promise<(NewsItem & { paragraphs?: string[] }) | null> {
+  const docs = await fetchPublishedNewsDocs();
+  const doc = docs.find((item) => {
+    if (locale === "en") {
+      return item.slugEn === slug || item.slug === slug;
+    }
+    return item.slug === slug;
+  });
+  return doc ? mapToNewsItem(doc, locale) : null;
+}
+
+export async function fetchPublishedSlugs(
+  locale: Locale = "uk",
+): Promise<string[]> {
+  const items = await fetchPublishedNews(locale);
   return items.map((i) => i.slug);
 }
 
 export async function getNewsItemsWithFirebaseFallback(
   fallbackNews: NewsItem[],
+  locale: Locale = "uk",
 ): Promise<(NewsItem & { paragraphs?: string[] })[]> {
   if (!isFirebaseConfigured()) {
     return fallbackNews.filter((n) => n.status === "ready");
   }
-  return fetchPublishedNews();
+  return fetchPublishedNews(locale);
 }
 
 export async function getNewsItemWithFirebaseFallback(
   slug: string,
   fallbackNews: NewsItem[],
+  locale: Locale = "uk",
 ): Promise<(NewsItem & { paragraphs?: string[] }) | undefined> {
   if (!isFirebaseConfigured()) {
     return fallbackNews.find((n) => n.slug === slug);
   }
-  const item = await fetchPublishedNewsBySlug(slug);
+  const item = await fetchPublishedNewsBySlug(slug, locale);
   return item ?? undefined;
 }

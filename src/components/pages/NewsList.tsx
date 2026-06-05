@@ -19,7 +19,7 @@ function formatDate(date: string, locale: Locale) {
 export async function NewsList({ locale }: { locale: Locale }) {
   const { news, nav, home } = getContent(locale);
   const newsItems = sortNewsByDateDesc(
-    await getNewsItemsWithFirebaseFallback(news),
+    await getNewsItemsWithFirebaseFallback(news, locale),
   );
   const base = localePath(locale, "/novyny");
 

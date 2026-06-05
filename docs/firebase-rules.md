@@ -60,4 +60,10 @@ service firebase.storage {
 - `REVALIDATE_SECRET` — довільний секрет (сервер)
 - `NEXT_PUBLIC_REVALIDATE_SECRET` — **той самий** секрет (клієнт, для `/api/revalidate`)
 
+Опційно (кращий автопереклад новин UK→EN у адмінці):
+
+- `DEEPL_AUTH_KEY` — ключ [DeepL API Free](https://www.deepl.com/pro-api)
+
+Без DeepL використовується безкоштовний MyMemory (ліміт на довгі тексти).
+
 Після зміни змінних — **Redeploy** проєкт на Vercel.

@@ -15,6 +15,14 @@ export type FirebaseNewsDoc = {
   body: string;
   bodyJson?: Record<string, unknown> | null;
   bodyHtml?: string;
+  /** English version for /en/novyny */
+  titleEn?: string;
+  slugEn?: string;
+  excerptEn?: string;
+  bodyEn?: string;
+  bodyJsonEn?: Record<string, unknown> | null;
+  bodyHtmlEn?: string;
+  imageAltEn?: string;
   publishedAt: string;
   status: FirebaseNewsStatus;
   /** @deprecated use images[0] — kept for older documents */

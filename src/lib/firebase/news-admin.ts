@@ -85,6 +85,16 @@ function parseDoc(id: string, data: Record<string, unknown>): FirebaseNewsDoc {
         ? (data.bodyJson as Record<string, unknown>)
         : null,
     bodyHtml: String(data.bodyHtml ?? ""),
+    titleEn: String(data.titleEn ?? ""),
+    slugEn: String(data.slugEn ?? ""),
+    excerptEn: String(data.excerptEn ?? ""),
+    bodyEn: String(data.bodyEn ?? ""),
+    bodyJsonEn:
+      data.bodyJsonEn && typeof data.bodyJsonEn === "object"
+        ? (data.bodyJsonEn as Record<string, unknown>)
+        : null,
+    bodyHtmlEn: String(data.bodyHtmlEn ?? ""),
+    imageAltEn: String(data.imageAltEn ?? ""),
     publishedAt: String(
       data.publishedAt ?? new Date().toISOString().slice(0, 10),
     ),

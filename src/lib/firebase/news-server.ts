@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
-import type { ContentStatus, NewsItem } from "@/content/types";
+import type { NewsItem } from "@/content/types";
 import { firebaseConfig, isFirebaseConfigured } from "./config";
 import type { JSONContent } from "@tiptap/core";
 import type { FirebaseNewsDoc, FirebaseNewsStatus } from "./news-types";
@@ -120,7 +120,6 @@ export async function fetchPublishedNews(): Promise<
 
   try {
     const db = getServerFirestore();
-    // Query must match Firestore Rules (only published readable without auth).
     const q = query(
       collection(db, COLLECTION),
       where("status", "==", "published"),
@@ -136,30 +135,12 @@ export async function fetchPublishedNews(): Promise<
   }
 }
 
+/** Без окремого запиту slug+status (не потрібен composite index у Firestore). */
 export async function fetchPublishedNewsBySlug(
   slug: string,
 ): Promise<(NewsItem & { paragraphs?: string[] }) | null> {
-  if (!isFirebaseConfigured()) {
-    return null;
-  }
-
-  try {
-    const db = getServerFirestore();
-    const q = query(
-      collection(db, COLLECTION),
-      where("slug", "==", slug),
-      where("status", "==", "published"),
-    );
-    const snap = await getDocs(q);
-    const first = snap.docs[0];
-    if (!first) {
-      return null;
-    }
-    return mapToNewsItem(parseDoc(first.id, first.data()));
-  } catch (error) {
-    console.error("[firebase] fetchPublishedNewsBySlug failed:", error);
-    return null;
-  }
+  const items = await fetchPublishedNews();
+  return items.find((item) => item.slug === slug) ?? null;
 }
 
 export async function fetchPublishedSlugs(): Promise<string[]> {
@@ -170,20 +151,19 @@ export async function fetchPublishedSlugs(): Promise<string[]> {
 export async function getNewsItemsWithFirebaseFallback(
   fallbackNews: NewsItem[],
 ): Promise<(NewsItem & { paragraphs?: string[] })[]> {
-  const firebaseNews = await fetchPublishedNews();
-  if (firebaseNews.length > 0) {
-    return firebaseNews;
+  if (!isFirebaseConfigured()) {
+    return fallbackNews.filter((n) => n.status === "ready");
   }
-  return fallbackNews.filter((n) => n.status === "ready");
+  return fetchPublishedNews();
 }
 
 export async function getNewsItemWithFirebaseFallback(
   slug: string,
   fallbackNews: NewsItem[],
 ): Promise<(NewsItem & { paragraphs?: string[] }) | undefined> {
-  const item = await fetchPublishedNewsBySlug(slug);
-  if (item) {
-    return item;
+  if (!isFirebaseConfigured()) {
+    return fallbackNews.find((n) => n.slug === slug);
   }
-  return fallbackNews.find((n) => n.slug === slug);
+  const item = await fetchPublishedNewsBySlug(slug);
+  return item ?? undefined;
 }

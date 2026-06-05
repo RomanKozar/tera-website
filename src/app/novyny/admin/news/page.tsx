@@ -15,6 +15,7 @@ import {
   listAllNewsAdminWithTimeout,
 } from "@/lib/firebase/news-admin";
 import type { FirebaseNewsDoc, FirebaseNewsStatus } from "@/lib/firebase/news-types";
+import { revalidatePublicSite } from "@/lib/revalidate-public";
 
 function NewsStatusBadge({ status }: { status: FirebaseNewsStatus }) {
   if (status === "published") {
@@ -87,6 +88,7 @@ export default function AdminNewsListPage() {
       return;
     }
     await deleteNewsAdmin(id);
+    await revalidatePublicSite();
     await load();
   }
 

@@ -15,6 +15,7 @@ import {
   slugifyTitle,
   updateNewsAdmin,
 } from "@/lib/firebase/news-admin";
+import { revalidatePublicSite } from "@/lib/revalidate-public";
 
 type Props = {
   initial?: FirebaseNewsDoc;
@@ -125,7 +126,7 @@ export function NewsForm({ initial }: Props) {
         await updateNewsAdmin(docId, payload);
       }
 
-      await fetch("/api/revalidate", { method: "POST" }).catch(() => undefined);
+      await revalidatePublicSite();
 
       router.push("/novyny/admin/news");
       router.refresh();

@@ -6,6 +6,9 @@ import { ContentStatusBadge } from "@/components/ui/ContentStatusBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { PageContent } from "@/content/types";
 import { MembersPage } from "@/components/pages/MembersPage";
+import { ContestsGrantsPage } from "@/components/pages/ContestsGrantsPage";
+import { BestPracticesPage } from "@/components/pages/BestPracticesPage";
+import { RiverPage } from "@/components/pages/RiverPage";
 import { ContactsPage } from "@/components/pages/ContactsPage";
 import { StatutoryBodiesPage } from "@/components/pages/StatutoryBodiesPage";
 import { IMAGES } from "@/lib/images";
@@ -208,6 +211,18 @@ export function ContentPage({
 
   if (pageKey === "kontakty") {
     return <ContactsPage locale={locale} page={page} />;
+  }
+
+  if (pageKey === "richka-tereblya") {
+    return <RiverPage locale={locale} />;
+  }
+
+  if (pageKey === "krashi-praktyky") {
+    return <BestPracticesPage locale={locale} />;
+  }
+
+  if (pageKey === "konkursy-ta-granty") {
+    return <ContestsGrantsPage locale={locale} />;
   }
 
   return (

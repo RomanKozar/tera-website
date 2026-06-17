@@ -168,19 +168,13 @@ export const content: SiteContent = {
     },
     "krashi-praktyky": {
       title: "Best practices",
-      status: "draft",
-      body: [
-        "This section will publish examples of successful solutions and experience from communities of the Tereblya Valley.",
-        "Content is being prepared.",
-      ],
+      status: "ready",
+      body: [],
     },
     "konkursy-ta-granty": {
       title: "Grants and contests",
-      status: "planned",
-      body: [
-        "This section is dedicated to funding opportunities and participation in contests.",
-        "Content for this section is currently under discussion.",
-      ],
+      status: "ready",
+      body: [],
     },
     "nashi-proekty": {
       title: "Our projects",
@@ -196,11 +190,8 @@ export const content: SiteContent = {
     },
     "richka-tereblya": {
       title: "Tereblya River",
-      status: "draft",
-      body: [
-        "The Tereblya River is a symbol of unity for the communities of the Tereblya Valley, reflected in the logo of the «TeRA» association.",
-        "Material about the river and related initiatives is being prepared.",
-      ],
+      status: "ready",
+      body: [],
     },
     "pro-nas": {
       title: "About us",
